@@ -28,5 +28,15 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.*" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\D365FL.Dataverse.PluginHelper.Core\D365FL.Dataverse.PluginHelper.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ILocalPluginContextExtensions\" />
+    <Folder Include="Logic\" />
+    <Folder Include="Plugins\Account\" />
+  </ItemGroup>
+
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Plugin.targets" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Plugin.targets')" />
 </Project>

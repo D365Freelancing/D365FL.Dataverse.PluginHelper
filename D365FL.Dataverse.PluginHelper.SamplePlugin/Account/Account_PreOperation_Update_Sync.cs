@@ -1,3 +1,9 @@
+﻿using System;
+using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
+using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
+using D365FL.Dataverse.PluginHelper.Core.Rules;
+using Microsoft.Xrm.Sdk;
+
 // PURPOSE
 // 1. Provide descriptive methods to make reading the code easier
 // 2. Provide descriptive methods to ensure no logical mistakes are made, and therefore avoid defects eg. context.Mesage = "Creat"
@@ -13,25 +19,15 @@
 
 // Entity Field Value Has Changed
 // AttributeHasChanged - https://github.com/emerbrito/XrmUtils-Extensions/blob/master/src/XrmUtils.Extensions/Extensions/EntityExtensions.cs#L84
-using System;
-using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
-using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
-using D365FL.Dataverse.PluginHelper.Core.Rules;
-using Microsoft.Xrm.Sdk;
 
-namespace D365FL.Dataverse.PluginHelper.SamplePlugin
+
+namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Account
 {
 
- 
-    /// <summary>
-    /// Plugin development guide: https://docs.microsoft.com/powerapps/developer/common-data-service/plug-ins
-    /// Best practices and guidance: https://docs.microsoft.com/powerapps/developer/common-data-service/best-practices/business-logic/
-    /// </summary>
-    /// 
-    public class Plugin1 : PluginBase
+    public class Account_PreOperation_Update_Sync : PluginBase
     {
-        public Plugin1(string unsecureConfiguration, string secureConfiguration)
-            : base(typeof(Plugin1))
+        public Account_PreOperation_Update_Sync(string unsecureConfiguration, string secureConfiguration)
+            : base(typeof(Account_PreOperation_Update_Sync))
         {
             // TODO: Implement your custom configuration handling
             // https://docs.microsoft.com/powerapps/developer/common-data-service/register-plug-in#set-configuration-data
@@ -83,14 +79,15 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin
             var preImage = context.GetPreImage();
 
             var triggered = ValidateHasBeenTriggered(target, preImage);
-            if (!triggered) {
+            if (!triggered)
+            {
                 return; // exit plugin as triggered fields have not changed
             }
 
             // Execute Logic
-            
+
             // Only save modified fields
-            
+
             // ValidateConfig
 
         }
