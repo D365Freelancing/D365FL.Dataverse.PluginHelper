@@ -1,5 +1,7 @@
-﻿using Microsoft.Xrm.Sdk;
+﻿using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
+using Microsoft.Xrm.Sdk;
 using System;
+using System.IdentityModel.Metadata;
 using System.Xml.Linq;
 
 
@@ -44,13 +46,18 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         /// <param name="name">The Pre Image Entity name</param>
         /// <returns>The Pre Image Entiy</returns>
         /// <exception cref="ArgumentException">Exception is thrown if inputted name does not match a PreImage</exception>
-        public static Entity GetPreImage(this IPluginExecutionContext context, string name)
+        public static Entity GetPreImage(this IPluginExecutionContext context, string name, ITracingService tracer = null)
         {
             if (!context.HasPreImage(name))
             {
                 throw new ArgumentException($"Pre Image with name \"{name}\" does not exist.");
             }
-            return (Entity)context.PreEntityImages[name];
+
+            var image = (Entity)context.PreEntityImages[name];
+
+            if (tracer != null) tracer.TraceEntity(image, name);
+
+            return image;
         }
 
         /// <summary>
@@ -59,9 +66,9 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         /// <param name="context"></param>
         /// <returns>The Pre Image Entiy</returns>
         /// <exception cref="ArgumentException">Exception is thrown if inputted name does not match a PreImage</exception>
-        public static Entity GetPreImage(this IPluginExecutionContext context)
+        public static Entity GetPreImage(this IPluginExecutionContext context, ITracingService tracer = null)
         {
-            return context.GetPreImage(ImageNames.PreImageName);
+            return context.GetPreImage(ImageNames.PreImageName, tracer);
         }
 
         #endregion

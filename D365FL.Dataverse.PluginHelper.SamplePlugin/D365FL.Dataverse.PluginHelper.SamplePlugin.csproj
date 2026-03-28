@@ -33,9 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Account\" />
     <Folder Include="ILocalPluginContextExtensions\" />
-    <Folder Include="Logic\" />
-    <Folder Include="Plugins\Account\" />
   </ItemGroup>
 
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Plugin.targets" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Plugin.targets')" />

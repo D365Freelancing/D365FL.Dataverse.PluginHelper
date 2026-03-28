@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xrm.Sdk;
-using System;
 using System.Collections.Generic;
 
 namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
@@ -14,9 +13,9 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
                 return;
             }
 
-            tracingService.Trace($"[{label}] LogicalName: {entity.LogicalName}");
-            tracingService.Trace($"[{label}] Id: {entity.Id}");
-            tracingService.Trace($"[{label}] Attribute Count: {entity.Attributes.Count}");
+            tracingService.TraceWithKey(label, $"LogicalName: {entity.LogicalName}");
+            tracingService.TraceWithKey(label, $"Id: {entity.Id}");
+            tracingService.TraceWithKey(label, $"Attribute Count: {entity.Attributes.Count}");
 
             foreach (var attribute in entity.Attributes)
             {
@@ -24,7 +23,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
                 var attributeValue = GetAttributeValue(attribute);
                 var attributeType = GetAttributeType(attribute);
 
-                tracingService.Trace($"[{label}]  {attributeName}: [{attributeType}] {attributeValue}");
+                tracingService.TraceWithKey(label, $" {attributeName}: [{attributeType}] {attributeValue}");
             }
         }
 
@@ -41,6 +40,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
                 case EntityReference er:
                     var name = !string.IsNullOrEmpty(er.Name) ? er.Name : "NOT SET";
                     attributeValue = $"EntityReference(LogicalName={er.LogicalName}, Id={er.Id}, Name={name})";
+                    // TODO handle Key Value Pair Ids
                     break;
                 case OptionSetValue osv:
                     attributeValue = $"OptionSetValue({osv.Value})";
@@ -71,21 +71,21 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
                 return;
             }
 
-            tracingService.Trace($"[{label}] ===== EntityReference Trace =====");
-            tracingService.Trace($"[{label}] LogicalName : {entityRef.LogicalName ?? "(null)"}");
-            tracingService.Trace($"[{label}] Id          : {entityRef.Id}");
-            tracingService.Trace($"[{label}] Name        : {entityRef.Name ?? "(null)"}");
-            tracingService.Trace($"[{label}] KeyAttributes Count: {entityRef.KeyAttributes?.Count ?? 0}");
+            tracingService.TraceWithKey(label, $"===== EntityReference Trace =====");
+            tracingService.TraceWithKey(label, $"LogicalName : {entityRef.LogicalName ?? "(null)"}");
+            tracingService.TraceWithKey(label, $"Id          : {entityRef.Id}");
+            tracingService.TraceWithKey(label, $"Name        : {entityRef.Name ?? "(null)"}");
+            tracingService.TraceWithKey(label, $"KeyAttributes Count: {entityRef.KeyAttributes?.Count ?? 0}");
 
             if (entityRef.KeyAttributes != null && entityRef.KeyAttributes.Count > 0)
             {
                 foreach (var key in entityRef.KeyAttributes)
                 {
-                    tracingService.Trace($"[{label}]   KeyAttribute - {key.Key}: {key.Value ?? "(null)"}");
+                    tracingService.TraceWithKey(label, $"   KeyAttribute - {key.Key}: {key.Value ?? "(null)"}");
                 }
             }
 
-            tracingService.Trace($"[{label}] ===== End of EntityReference =====");
+            tracingService.TraceWithKey(label, $"===== End of EntityReference =====");
         }
     }
 }

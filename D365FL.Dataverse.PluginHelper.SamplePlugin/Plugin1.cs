@@ -42,7 +42,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin
             var rules = new RuleFactory(context, tracingService);
             rules.AddIsPostOperationRule()
                 .AddIsAsynchronousRule()
-                .AddHasTargertEntityRule()
+                .AddHasTargetEntityRule()
                 .AddTargetEntityLogicalNameRule("account")
                 .AddIsCreateMessageRule()
                 .AddDoesNotExceedMaxDepthRule(3)

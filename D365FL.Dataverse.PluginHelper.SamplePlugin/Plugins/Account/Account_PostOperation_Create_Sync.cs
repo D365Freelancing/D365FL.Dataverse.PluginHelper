@@ -2,47 +2,28 @@
 using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
+using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 using Microsoft.Xrm.Sdk;
 
-// PURPOSE
-// 1. Provide descriptive methods to make reading the code easier
-// 2. Provide descriptive methods to ensure no logical mistakes are made, and therefore avoid defects eg. context.Mesage = "Creat"
-
-
-// Goal to have helper classes that provide highly readably, less error prone and self documenting code
-// highly readably - The helper class makes the code highly readably with very descriptve method names. 
-// less error prone - The helper class makes the code less error prone by having specific methods which removes the need for magic strings
-// self documenting code - plugins and importantly plugin configuration is documented within the plugin code.
-// If you have ever lost your plugin steps and had to re register them, then you will apprciate the plugin rules validating the plugin step
-// registration config (NOTE this does rely on developers implementing the plugin rules correctly
-
-
-// Entity Field Value Has Changed
-// AttributeHasChanged - https://github.com/emerbrito/XrmUtils-Extensions/blob/master/src/XrmUtils.Extensions/Extensions/EntityExtensions.cs#L84
-
-
-namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Account
+namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 {
-
-    public class Account_PreOperation_Update_Sync : PluginBase
+    public class Account_PostOperation_Create_Sync : PluginBase
     {
-        public Account_PreOperation_Update_Sync(string unsecureConfiguration, string secureConfiguration)
-            : base(typeof(Account_PreOperation_Update_Sync))
+        public Account_PostOperation_Create_Sync(string unsecureConfiguration, string secureConfiguration)
+           : base(typeof(Account_PostOperation_Create_Sync))
         {
             // TODO: Implement your custom configuration handling
             // https://docs.microsoft.com/powerapps/developer/common-data-service/register-plug-in#set-configuration-data
         }
-
         private void ValidateConfig(IPluginExecutionContext context, ITracingService tracingService)
         {
             var rules = new RuleFactory(context, tracingService);
             rules.AddIsPostOperationRule()
-                .AddIsAsynchronousRule()
-                .AddHasTargertEntityRule()
+                .AddIsSynchronousRule()
+                .AddHasTargetEntityRule()
                 .AddTargetEntityLogicalNameRule("account")
                 .AddIsCreateMessageRule()
                 .AddDoesNotExceedMaxDepthRule(3)
-                .AddHasPreImageRule()
                 .TraceRules();
 
             if (!rules.IsValid)
@@ -76,9 +57,9 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Account
             ValidateConfig(context, tracingService);
 
             var target = context.GetTargetEntity();
-            var preImage = context.GetPreImage();
+            var blankEntity = new Entity();
 
-            var triggered = ValidateHasBeenTriggered(target, preImage);
+            var triggered = ValidateHasBeenTriggered(target, blankEntity);
             if (!triggered)
             {
                 return; // exit plugin as triggered fields have not changed
@@ -93,11 +74,3 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Account
         }
     }
 }
-
-//var pluginUserService = localPluginContext.PluginUserService;
-//var adminOrgService = localPluginContext.OrgSvcFactory.CreateOrganizationService(null);
-//var adminOrgService2 = localPluginContext.ServiceProvider.GetAdminOrgService();
-
-//var userId = Guid.NewGuid();
-//var orgServiceAs = localPluginContext.OrgSvcFactory.CreateOrganizationService(userId);
-//var orgServiceAs2 = localPluginContext.ServiceProvider.GetOrgServiceAs(userId);

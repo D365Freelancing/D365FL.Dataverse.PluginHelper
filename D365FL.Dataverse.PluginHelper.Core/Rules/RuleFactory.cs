@@ -43,13 +43,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
         #endregion
 
         #region "Target Rules"
-        public RuleFactory AddHasTargertEntityRule()
+        public RuleFactory AddHasTargetEntityRule()
         {
             _rules.Add("HasTargertEntity", _context.HasTargetEntity());
 
             return this;
         }
-        public RuleFactory AddHasTargertEntityReferenceRule()
+        public RuleFactory AddHasTargetEntityReferenceRule()
         {
             _rules.Add("HasTargertEntityReference", _context.HasTargetEntityReference());
 
