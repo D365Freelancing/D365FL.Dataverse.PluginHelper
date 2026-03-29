@@ -1,9 +1,6 @@
 ﻿using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 using Microsoft.Xrm.Sdk;
 using System;
-using System.IdentityModel.Metadata;
-using System.Xml.Linq;
-
 
 namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
 {

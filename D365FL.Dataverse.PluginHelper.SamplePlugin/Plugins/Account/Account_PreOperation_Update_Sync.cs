@@ -4,6 +4,8 @@ using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
 using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account;
 using Microsoft.Xrm.Sdk;
+using System.Linq;
+using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 {
@@ -41,20 +43,42 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             }
 
             var context = localPluginContext.PluginExecutionContext;
-            var tracingService = localPluginContext.TracingService;
+            var tracer = localPluginContext.TracingService;
 
-            ValidateConfig(context, tracingService);
+            DebugImages(context, tracer);
 
-            var target = context.GetTargetEntity();
-            var preImage = context.GetPreImage();
+            ValidateConfig(context, tracer);
+
+            var target = context.GetTargetEntity(tracer);
+            var preImage = context.GetPreImage(tracer);
 
             // Merge preImage and target entity to ensure logic does not fail because of missing field values
             var fullEntity = preImage.CloneAndMergeEntities(target);
 
-            if (SetNameTriggered(target, preImage))
+            Execute(target, preImage, fullEntity, tracer);
+        }
+
+        private void Execute(Entity target, Entity preImage, Entity fullEntity, ITracingService tracer)
+        {
+            try
             {
-                // only set name if fields that are used to calculate the name have changed.
-                SetName(target, fullEntity, tracingService);
+                if (SetNameTriggered(target, preImage))
+                {
+                    // only set name if fields that are used to calculate the name have changed.
+                    SetName(target, fullEntity, tracer);
+                }
+            }
+            catch (InvalidPluginExecutionException ex)
+            {
+                // Log it, but re-throw as-is — the message is already user-friendly
+                tracer.Trace("Validation/plugin error: {0}", ex.ToString());
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Unexpected error — log and wrap with a safe user-facing message
+                tracer.Trace("Plugin Error: {0}", ex.ToString());
+                throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
         }
 
@@ -67,13 +91,28 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 
             return triggered;
         }
-        private static void SetName(Entity target, Entity fullEntity, ITracingService tracingService)
+        private void SetName(Entity target, Entity fullEntity, ITracingService tracingService)
         {
             var nameCalculator = new AccountNameCalculator(tracingService);
             var newName = nameCalculator.CalculateName(fullEntity);
 
             // Assign to target (not fullEntity) — Pre-Operation writes target back to the database automatically
             target["name"] = newName;
+        }
+
+        private static void DebugImages(IPluginExecutionContext context, ITracingService tracer)
+        {
+            tracer.TraceWithKey("PreImages", "Get PreImage Keys");
+            tracer.TraceWithKey("PreImages", $"  Count {context.PreEntityImages.Count}");
+            context.PreEntityImages
+                .ToList()
+                .ForEach(img => tracer.TraceWithKey("PreImages", $"  {img.Key}"));
+
+            tracer.TraceWithKey("PostImages", "Get PostImages Keys");
+            tracer.TraceWithKey("PostImages", $"  Count {context.PostEntityImages.Count}");
+            context.PreEntityImages
+                .ToList()
+                .ForEach(img => tracer.TraceWithKey("PostImages", $"  {img.Key}"));
         }
     }
 }

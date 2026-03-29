@@ -59,17 +59,37 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             }
 
             var context = localPluginContext.PluginExecutionContext;
-            var tracingService = localPluginContext.TracingService;
+            var tracer = localPluginContext.TracingService;
 
-            ValidateConfig(context, tracingService);
+            ValidateConfig(context, tracer);
 
-            var target = context.GetTargetEntity();
+            var target = context.GetTargetEntity(tracer);
 
-            ValidateRequiredFields(target);
-                       
-            SetName(target, tracingService);
+            Execute(target, tracer);
         }
 
+        private void Execute(Entity target, ITracingService tracer)
+        {
+            try
+            {
+                ValidateRequiredFields(target);
+
+                SetName(target, tracer);
+            }
+            catch (InvalidPluginExecutionException ex) 
+            {
+                // Log it, but re-throw as-is — the message is already user-friendly
+                tracer.Trace("Validation/plugin error: {0}", ex.ToString());
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Unexpected error — log and wrap with a safe user-facing message
+                tracer.Trace("Plugin Error: {0}", ex.ToString());
+                throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
+            }
+            
+        }
         private static void SetName(Entity target, ITracingService tracingService)
         {
             var nameCalculator = new AccountNameCalculator(tracingService);

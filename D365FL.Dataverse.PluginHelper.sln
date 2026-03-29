@@ -11,9 +11,34 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D365FL.Dataverse.PluginHelp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{369FF3AC-91F1-4C9D-9959-BAD1E70A2DD8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E53EDAD1-F515-4B64-99E0-E968C186D010}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{E53EDAD1-F515-4B64-99E0-E968C186D010}"
 	ProjectSection(SolutionItems) = preProject
+		Documentation\001_ValidateConfig.md = Documentation\001_ValidateConfig.md
+		Documentation\002_ValidateTriggers.md = Documentation\002_ValidateTriggers.md
+		Documentation\003_ExecuteLogic.md = Documentation\003_ExecuteLogic.md
+		Documentation\004_OnlySaveDataIfItHasChanged.md = Documentation\004_OnlySaveDataIfItHasChanged.md
+		Documentation\005_HowToUseTheDiffrentOrgServices - Copy.md = Documentation\005_HowToUseTheDiffrentOrgServices - Copy.md
+		Documentation\006_ErrorHandling.md = Documentation\006_ErrorHandling.md
+		Documentation\007_Config.md = Documentation\007_Config.md
+		Documentation\008_ParentChildPlugins.md = Documentation\008_ParentChildPlugins.md
+		Documentation\009_Deployments.md = Documentation\009_Deployments.md
+		Documentation\010_Testing.md = Documentation\010_Testing.md
+		Documentation\011_PreventativeMaintenance.md = Documentation\011_PreventativeMaintenance.md
+		Documentation\Samples\Associate.md = Documentation\Samples\Associate.md
+		Documentation\Samples\Delete.md = Documentation\Samples\Delete.md
 		README.md = README.md
+		Documentation\Samples\Sampe_PreOperation_Create.md = Documentation\Samples\Sampe_PreOperation_Create.md
+		Documentation\Samples\Sampe_PreOperation_Update.md = Documentation\Samples\Sampe_PreOperation_Update.md
+		Documentation\Samples\Sampe_PreValidation_Create.md = Documentation\Samples\Sampe_PreValidation_Create.md
+		Documentation\Samples\Sampe_PreValidation_Update.md = Documentation\Samples\Sampe_PreValidation_Update.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A62E9A03-0DB0-4B7A-AFAE-D821567A9284}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Samples\Sampe_PreOperation_Create.md = Documentation\Samples\Sampe_PreOperation_Create.md
+		Documentation\Samples\Sampe_PreOperation_Update.md = Documentation\Samples\Sampe_PreOperation_Update.md
+		Documentation\Samples\Sampe_PreValidation_Create.md = Documentation\Samples\Sampe_PreValidation_Create.md
+		Documentation\Samples\Sampe_PreValidation_Update.md = Documentation\Samples\Sampe_PreValidation_Update.md
 	EndProjectSection
 EndProject
 Global
@@ -40,6 +65,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F92B2D73-767E-4CFD-83DC-C13F002F1A82} = {369FF3AC-91F1-4C9D-9959-BAD1E70A2DD8}
+		{A62E9A03-0DB0-4B7A-AFAE-D821567A9284} = {E53EDAD1-F515-4B64-99E0-E968C186D010}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1DE04C78-1AC7-4B5A-99C1-0523EA0503F2}

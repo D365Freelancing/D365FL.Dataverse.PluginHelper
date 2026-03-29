@@ -1,4 +1,5 @@
 ﻿using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
+using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 using Microsoft.Xrm.Sdk;
 using System.Collections.Generic;
 using System.Linq;
@@ -155,23 +156,23 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
 
         public bool IsValid { get { return _rules.All(r => r.Value); } }
 
-        public void TraceRules()
+        public void TraceRules(string tracingLabel = "RuleValidation")
         {
             var invalidRules = GetRuleDictionary().Where(r => !r.Value).ToList();
             var validRules = GetRuleDictionary().Where(r => r.Value).ToList();
 
-            _tracingService.Trace($"Config Rules are Valid: {IsValid}");
+            _tracingService.TraceWithKey("RuleValidation", $"Config Rules are Valid: {IsValid}");
             
             if (!IsValid)
             {
-                _tracingService.Trace("Config Rule FAILED");
-                _tracingService.Trace("FAILED RULES");
+                _tracingService.TraceWithKey("RuleValidation", "  Config Rule FAILED");
+                _tracingService.TraceWithKey("RuleValidation", "  FAILED RULES");
 
-                invalidRules.ForEach(r => _tracingService.Trace($"{r.Key}"));
+                invalidRules.ForEach(r => _tracingService.TraceWithKey("RuleValidation", $"    {r.Key}"));
             }
 
             _tracingService.Trace("VALID RULES");
-            validRules.ToList().ForEach(r => _tracingService.Trace($"{r.Key}"));
+            validRules.ForEach(r => _tracingService.TraceWithKey("RuleValidation", $"    {r.Key}"));
         }
     }
 }
