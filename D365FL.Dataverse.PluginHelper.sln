@@ -27,10 +27,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		Documentation\Samples\Associate.md = Documentation\Samples\Associate.md
 		Documentation\Samples\Delete.md = Documentation\Samples\Delete.md
 		README.md = README.md
-		Documentation\Samples\Sampe_PreOperation_Create.md = Documentation\Samples\Sampe_PreOperation_Create.md
-		Documentation\Samples\Sampe_PreOperation_Update.md = Documentation\Samples\Sampe_PreOperation_Update.md
-		Documentation\Samples\Sampe_PreValidation_Create.md = Documentation\Samples\Sampe_PreValidation_Create.md
-		Documentation\Samples\Sampe_PreValidation_Update.md = Documentation\Samples\Sampe_PreValidation_Update.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A62E9A03-0DB0-4B7A-AFAE-D821567A9284}"
