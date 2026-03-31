@@ -71,7 +71,9 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 
             var accountUpdate = new Entity("account", target.Id);
             accountUpdate["name"] = "helloworld";
-            
+
+            //target.GetChangedFields(accountUpdate);
+
             InitiatingUserService.Update(accountUpdate);
             tracingService.Trace("updated");
             tracingService.TraceWithKey("OutputParameters", "");
