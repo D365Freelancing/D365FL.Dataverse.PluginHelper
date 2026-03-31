@@ -1,17 +1,13 @@
 ﻿using Microsoft.Xrm.Sdk;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.Core
 {
-    public class TestTracingService : ITracingService
+    internal class TestTracingService : ITracingService
     {
         private readonly StringBuilder _traceText;
 
-        public TestTracingService()
+        internal TestTracingService()
         {
             _traceText = new StringBuilder();
         }
@@ -22,12 +18,6 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.Core
                 .AppendLine();
         }
 
-        public string TraceLogs
-        {
-            get
-            {
-                return _traceText.ToString();
-            }
-        }
+        internal string TraceLogs => _traceText.ToString();
     }
 }

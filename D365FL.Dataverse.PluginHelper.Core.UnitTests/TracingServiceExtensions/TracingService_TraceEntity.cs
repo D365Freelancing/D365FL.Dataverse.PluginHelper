@@ -3,8 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 using Microsoft.Xrm.Sdk;
 using System;
-using System.Runtime.Remoting.Messaging;
-using System.Runtime.Remoting.Services;
 
 namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.TracingServiceExtensions
 {
@@ -12,18 +10,10 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.TracingServiceExtensions
     public class TracingService_TraceEntity
     {
 
-        public string Label => "TestEntity";
-        public string EntityName => "Account";
+        private string Label => "TestEntity";
+        private string EntityName => "Account";
 
-        private Guid _id = Guid.Empty;
-        public Guid EntityId { get
-            {
-                if(_id == Guid.Empty)
-                    _id = Guid.NewGuid();
-                return _id;
-            } 
-        }
-        public Entity Entity => new Entity(EntityName) { Id = EntityId };
+        private Entity Entity => new Entity(EntityName) { Id = Guid.NewGuid() };
 
         [TestMethod]
         public void TraceEntity_OutputsEntityIsNull()
@@ -48,16 +38,14 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.TracingServiceExtensions
         {
 
             // ARRANGE
-
+            var entity = Entity;
             // ACT
             var tracer = new TestTracingService();
-            tracer.TraceEntity(Entity, Label);
-
-            tracer.TraceEntity(Entity, Label);
+            tracer.TraceEntity(entity, Label);
 
             // ASSERT
             var expectedLine1 = $"[{Label}] LogicalName: {EntityName}";
-            var expectedLine2 = $"[{Label}] Id: {EntityId}";
+            var expectedLine2 = $"[{Label}] Id: {entity.Id}";
             var expectedLine3 = $"[{Label}] Attribute Count: 0";
 
             var actualOutput = tracer.TraceLogs;
@@ -233,7 +221,6 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.TracingServiceExtensions
         {
             // ARRANGE
             var entity = Entity;
-            var referenceId = Guid.NewGuid();
             entity["stringValue"] = "string value";
             entity["IntegerValue"] = 42;
             entity["IntegerValue2"] = 9223372036854775807;
@@ -242,7 +229,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.TracingServiceExtensions
             entity["OptionSetValue"] = new OptionSetValue(6009876);
             entity["MoneySetValue"] = new Money(9999.99m);
             entity["AliasedValue"] = new AliasedValue("contact", "contact", "contact");
-            entity["EntityReferenceValue"] = new EntityReference("contact", referenceId) { Name = "Tester" };
+            entity["EntityReferenceValue"] = new EntityReference("contact", Guid.NewGuid()) { Name = "Tester" };
 
             // ACT
             var tracer = new TestTracingService();
@@ -257,4 +244,3 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.TracingServiceExtensions
         // TODO do Yes/No fields need to be tested
     }
 }
-

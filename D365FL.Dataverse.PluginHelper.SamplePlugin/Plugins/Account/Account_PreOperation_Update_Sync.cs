@@ -4,16 +4,28 @@ using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
 using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account;
 using Microsoft.Xrm.Sdk;
-using System.Linq;
-using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
+using System.Text.Json;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 {
+
     public class Account_PreOperation_Update_Sync : PluginBase
     {
+        private class SecureConfig
+        {
+            public int MaxRetries { get; set; } = 1; // Default to 1 if config is not set on the plugin
+        }
+
+        private readonly SecureConfig _secureConfig = null;
+
         public Account_PreOperation_Update_Sync(string unsecureConfiguration, string secureConfiguration)
             : base(typeof(Account_PreOperation_Update_Sync))
         {
+            _secureConfig = string.IsNullOrWhiteSpace(secureConfiguration)
+                ? new SecureConfig()
+                : JsonSerializer.Deserialize<SecureConfig>(
+                    secureConfiguration,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
         private void ValidateConfig(IPluginExecutionContext context, ITracingService tracingService)
@@ -24,7 +36,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 .AddHasTargetEntityRule()
                 .AddTargetEntityLogicalNameRule("account")
                 .AddIsUpdateMessageRule()
-                .AddDoesNotExceedMaxDepthRule(3)
+                .AddDoesNotExceedMaxDepthRule(_secureConfig.MaxRetries)
                 .AddHasPreImageRule()
                 .TraceRules();
 
@@ -45,15 +57,13 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             var context = localPluginContext.PluginExecutionContext;
             var tracer = localPluginContext.TracingService;
 
-            DebugImages(context, tracer);
-
             ValidateConfig(context, tracer);
 
             var target = context.GetTargetEntity(tracer);
             var preImage = context.GetPreImage(tracer);
 
             // Merge preImage and target entity to ensure logic does not fail because of missing field values
-            var fullEntity = preImage.CloneAndMergeEntities(target);
+            var fullEntity = preImage.Merge(target);
 
             Execute(target, preImage, fullEntity, tracer);
         }
@@ -62,11 +72,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
         {
             try
             {
-                if (SetNameTriggered(target, preImage))
-                {
-                    // only set name if fields that are used to calculate the name have changed.
-                    SetName(target, fullEntity, tracer);
-                }
+                SetName(target, preImage, fullEntity, tracer);
             }
             catch (InvalidPluginExecutionException ex)
             {
@@ -82,6 +88,22 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             }
         }
 
+        private void SetName(Entity target, Entity preImage, Entity fullEntity, ITracingService tracer)
+        {
+            if (!SetNameTriggered(target, preImage))
+            {
+                // only set name if fields that are used to calculate the name have changed.
+                tracer.Trace("Set Name fields have not changed, therefore existing and NOT calculating new name");
+                return;
+            }
+
+            var nameCalculator = new AccountNameCalculator(tracer);
+            var newName = nameCalculator.CalculateName(fullEntity);
+
+            // Assign to target (not fullEntity) — Pre-Operation writes target back to the database automatically
+            target["name"] = newName;
+        }
+
         private bool SetNameTriggered(Entity target, Entity preImage)
         {
             // Check fields impacting account name have changed before recalculating the name.
@@ -90,29 +112,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             var triggered = preImage.HaveAnyFieldsChanged(target, requiredFields);
 
             return triggered;
-        }
-        private void SetName(Entity target, Entity fullEntity, ITracingService tracingService)
-        {
-            var nameCalculator = new AccountNameCalculator(tracingService);
-            var newName = nameCalculator.CalculateName(fullEntity);
-
-            // Assign to target (not fullEntity) — Pre-Operation writes target back to the database automatically
-            target["name"] = newName;
-        }
-
-        private static void DebugImages(IPluginExecutionContext context, ITracingService tracer)
-        {
-            tracer.TraceWithKey("PreImages", "Get PreImage Keys");
-            tracer.TraceWithKey("PreImages", $"  Count {context.PreEntityImages.Count}");
-            context.PreEntityImages
-                .ToList()
-                .ForEach(img => tracer.TraceWithKey("PreImages", $"  {img.Key}"));
-
-            tracer.TraceWithKey("PostImages", "Get PostImages Keys");
-            tracer.TraceWithKey("PostImages", $"  Count {context.PostEntityImages.Count}");
-            context.PreEntityImages
-                .ToList()
-                .ForEach(img => tracer.TraceWithKey("PostImages", $"  {img.Key}"));
         }
     }
 }

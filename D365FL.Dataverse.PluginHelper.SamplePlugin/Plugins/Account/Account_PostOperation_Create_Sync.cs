@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
@@ -12,8 +13,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
         public Account_PostOperation_Create_Sync(string unsecureConfiguration, string secureConfiguration)
            : base(typeof(Account_PostOperation_Create_Sync))
         {
-            // TODO: Implement your custom configuration handling
-            // https://docs.microsoft.com/powerapps/developer/common-data-service/register-plug-in#set-configuration-data
+
         }
         private void ValidateConfig(IPluginExecutionContext context, ITracingService tracingService)
         {
@@ -59,14 +59,28 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             var target = context.GetTargetEntity();
             var blankEntity = new Entity();
 
+            tracingService.Trace("Execute1");
             var triggered = ValidateHasBeenTriggered(target, blankEntity);
             if (!triggered)
             {
                 return; // exit plugin as triggered fields have not changed
             }
 
+            tracingService.Trace("Execute2");
             // Execute Logic
 
+            var accountUpdate = new Entity("account", target.Id);
+            accountUpdate["name"] = "helloworld";
+            
+            InitiatingUserService.Update(accountUpdate);
+            tracingService.Trace("updated");
+            tracingService.TraceWithKey("OutputParameters", "");
+            tracingService.TraceWithKey("OutputParameters", "Logging Output Parameters");
+            tracingService.TraceWithKey("OutputParameters", $"Count {context.OutputParameters.Count}");
+            context.OutputParameters.ToList().ForEach(p =>
+            {
+                tracingService.TraceWithKey("OutputParameters", $"    param: {p.Key}, value: {p.Value.ToString()} ");
+            });
             // Only save modified fields
 
             // ValidateConfig

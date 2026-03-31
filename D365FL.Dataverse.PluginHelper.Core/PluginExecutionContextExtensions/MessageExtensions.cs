@@ -10,11 +10,11 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         internal const string Delete = "Delete";
         internal const string Associate = "Associate";
     }
-
     public static class MessageExtensions
     {
         internal static bool IsMessage(this IPluginExecutionContext context, string expectedMessage)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             return context.MessageName.Equals(expectedMessage, StringComparison.InvariantCultureIgnoreCase);
         }
         public static bool IsCreateMessage(this IPluginExecutionContext context)

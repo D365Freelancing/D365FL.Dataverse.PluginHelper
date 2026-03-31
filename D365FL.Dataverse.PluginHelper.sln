@@ -31,10 +31,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A62E9A03-0DB0-4B7A-AFAE-D821567A9284}"
 	ProjectSection(SolutionItems) = preProject
+		Documentation\Samples\Assign.md = Documentation\Samples\Assign.md
+		Documentation\Samples\Disassociate.md = Documentation\Samples\Disassociate.md
+		Documentation\Samples\Retrieve.md = Documentation\Samples\Retrieve.md
+		Documentation\Samples\RetrieveMultiple.md = Documentation\Samples\RetrieveMultiple.md
 		Documentation\Samples\Sampe_PreOperation_Create.md = Documentation\Samples\Sampe_PreOperation_Create.md
 		Documentation\Samples\Sampe_PreOperation_Update.md = Documentation\Samples\Sampe_PreOperation_Update.md
 		Documentation\Samples\Sampe_PreValidation_Create.md = Documentation\Samples\Sampe_PreValidation_Create.md
 		Documentation\Samples\Sampe_PreValidation_Update.md = Documentation\Samples\Sampe_PreValidation_Update.md
+		Documentation\Samples\SetState.md = Documentation\Samples\SetState.md
+		Documentation\Samples\SetStateDynamicEntity.md = Documentation\Samples\SetStateDynamicEntity.md
 	EndProjectSection
 EndProject
 Global

@@ -1,6 +1,7 @@
 ﻿using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 using Microsoft.Xrm.Sdk;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,14 +10,16 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
     public class RuleFactory
     {
         private readonly IPluginExecutionContext _context;
-        private readonly ITracingService _tracingService;
+        private readonly ITracingService _tracer;
         private Dictionary<string, bool> _rules;
         public RuleFactory(
             IPluginExecutionContext context,
-            ITracingService tracingService)
+            ITracingService tracer = null)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
             _context = context;
-            _tracingService = tracingService;
+            _tracer = tracer;
             _rules = new Dictionary<string, bool>();
         }
 
@@ -46,21 +49,26 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
         #region "Target Rules"
         public RuleFactory AddHasTargetEntityRule()
         {
-            _rules.Add("HasTargertEntity", _context.HasTargetEntity());
+            _rules.Add("HasTargetEntity", _context.HasTargetEntity());
 
             return this;
         }
         public RuleFactory AddHasTargetEntityReferenceRule()
         {
-            _rules.Add("HasTargertEntityReference", _context.HasTargetEntityReference());
+            _rules.Add("HasTargetEntityReference", _context.HasTargetEntityReference());
 
             return this;
         }
         public RuleFactory AddTargetEntityLogicalNameRule(string expectedName)
         {
-            _rules.Add(
-                $"HasTargertEntityLogicalName_{expectedName}",
-                _context.GetTargetEntity().LogicalName == expectedName);
+            
+            var ruleName = $"HasTargetEntityLogicalName_{expectedName}";
+
+            var isValid = false;
+            if (_context.HasTargetEntity())
+                isValid = _context.GetTargetEntity(_tracer).LogicalName == expectedName;
+            
+            _rules.Add(ruleName, isValid);
 
             return this;
         }
@@ -149,30 +157,26 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
         #endregion
 
 
-        public Dictionary<string, bool> GetRuleDictionary()
-        {
-            return _rules;
-        }
+        public IReadOnlyDictionary<string, bool> GetRuleDictionary() => _rules;
 
-        public bool IsValid { get { return _rules.All(r => r.Value); } }
+        public bool IsValid => _rules.All(r => r.Value);
 
         public void TraceRules(string tracingLabel = "RuleValidation")
         {
             var invalidRules = GetRuleDictionary().Where(r => !r.Value).ToList();
             var validRules = GetRuleDictionary().Where(r => r.Value).ToList();
 
-            _tracingService.TraceWithKey("RuleValidation", $"Config Rules are Valid: {IsValid}");
+            _tracer?.TraceWithKey(tracingLabel, $"Config Rules are Valid: {IsValid}");
             
             if (!IsValid)
             {
-                _tracingService.TraceWithKey("RuleValidation", "  Config Rule FAILED");
-                _tracingService.TraceWithKey("RuleValidation", "  FAILED RULES");
+                _tracer?.TraceWithKey(tracingLabel, "  FAILED RULES");
 
-                invalidRules.ForEach(r => _tracingService.TraceWithKey("RuleValidation", $"    {r.Key}"));
+                invalidRules.ForEach(r => _tracer?.TraceWithKey(tracingLabel, $"    {r.Key}"));
             }
 
-            _tracingService.Trace("VALID RULES");
-            validRules.ForEach(r => _tracingService.TraceWithKey("RuleValidation", $"    {r.Key}"));
+            _tracer?.TraceWithKey(tracingLabel, "VALID RULES");
+            validRules.ForEach(r => _tracer?.TraceWithKey(tracingLabel, $"    {r.Key}"));
         }
     }
 }

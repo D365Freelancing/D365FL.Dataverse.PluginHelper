@@ -1,21 +1,25 @@
 ﻿using Microsoft.Xrm.Sdk;
+using System;
 using System.Collections.Generic;
+
 
 namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
 {
     public static class TraceEntityExtensions
     {
-        public static void TraceEntity(this ITracingService tracingService, Entity entity, string label = "Entity")
+        public static void TraceEntity(this ITracingService tracer, Entity entity, string label = "Entity")
         {
+            if (tracer == null) throw new ArgumentNullException(nameof(tracer));
+
             if (entity == null)
             {
-                tracingService.Trace($"[{label}] Entity is null.");
+                tracer.Trace($"[{label}] Entity is null.");
                 return;
             }
 
-            tracingService.TraceWithKey(label, $"LogicalName: {entity.LogicalName}");
-            tracingService.TraceWithKey(label, $"Id: {entity.Id}");
-            tracingService.TraceWithKey(label, $"Attribute Count: {entity.Attributes.Count}");
+            tracer.TraceWithKey(label, $"LogicalName: {entity.LogicalName}");
+            tracer.TraceWithKey(label, $"Id: {entity.Id}");
+            tracer.TraceWithKey(label, $"Attribute Count: {entity.Attributes.Count}");
 
             foreach (var attribute in entity.Attributes)
             {
@@ -23,7 +27,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
                 var attributeValue = GetAttributeValue(attribute);
                 var attributeType = GetAttributeType(attribute);
 
-                tracingService.TraceWithKey(label, $" {attributeName}: [{attributeType}] {attributeValue}");
+                tracer.TraceWithKey(label, $" {attributeName}: [{attributeType}] {attributeValue}");
             }
         }
 
@@ -34,7 +38,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
 
         private static string GetAttributeValue(KeyValuePair<string, object> attr)
         {
-            var attributeValue = "";
+            string attributeValue = null;
             switch (attr.Value)
             {
                 case EntityReference er:
@@ -62,30 +66,31 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
             return attributeValue;
         }
 
-        public static void TraceEntityReference(this ITracingService tracingService, EntityReference entityRef, string label = "EntityReference")
+        public static void TraceEntityReference(this ITracingService tracer, EntityReference entityRef, string label = "EntityReference")
         {
+            if (tracer == null) throw new ArgumentNullException(nameof(tracer));
 
             if (entityRef == null)
             {
-                tracingService.Trace($"[{label}] is null.");
+                tracer.Trace($"[{label}] is null.");
                 return;
             }
 
-            tracingService.TraceWithKey(label, $"===== EntityReference Trace =====");
-            tracingService.TraceWithKey(label, $"LogicalName : {entityRef.LogicalName ?? "(null)"}");
-            tracingService.TraceWithKey(label, $"Id          : {entityRef.Id}");
-            tracingService.TraceWithKey(label, $"Name        : {entityRef.Name ?? "(null)"}");
-            tracingService.TraceWithKey(label, $"KeyAttributes Count: {entityRef.KeyAttributes?.Count ?? 0}");
+            tracer.TraceWithKey(label, $"===== EntityReference Trace =====");
+            tracer.TraceWithKey(label, $"LogicalName : {entityRef.LogicalName ?? "(null)"}");
+            tracer.TraceWithKey(label, $"Id          : {entityRef.Id}");
+            tracer.TraceWithKey(label, $"Name        : {entityRef.Name ?? "(null)"}");
+            tracer.TraceWithKey(label, $"KeyAttributes Count: {entityRef.KeyAttributes?.Count ?? 0}");
 
             if (entityRef.KeyAttributes != null && entityRef.KeyAttributes.Count > 0)
             {
                 foreach (var key in entityRef.KeyAttributes)
                 {
-                    tracingService.TraceWithKey(label, $"   KeyAttribute - {key.Key}: {key.Value ?? "(null)"}");
+                    tracer.TraceWithKey(label, $"   KeyAttribute - {key.Key}: {key.Value ?? "(null)"}");
                 }
             }
 
-            tracingService.TraceWithKey(label, $"===== End of EntityReference =====");
+            tracer.TraceWithKey(label, $"===== End of EntityReference =====");
         }
     }
 }

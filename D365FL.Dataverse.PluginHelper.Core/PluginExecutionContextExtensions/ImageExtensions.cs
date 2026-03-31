@@ -10,12 +10,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         internal const string PostImageName = "PostImage";
     }
 
+    // TODO create tests
     public static class ImageExtensions
     {
         #region "Pre Image"
         /// <summary>
-        /// WARNING: this method should be avoided and the HasPreImage() method used instead.
-        /// Checks if there is a Pre Image Entity mathcing the inputted name
+        /// WARNING: Prefer the parameterless overload unless a non-standard image name is required.
+        /// Checks if there is a Pre Image Entity matching the inputted name
         /// </summary>
         /// <param name="context"></param>
         /// <param name="name">The Pre Image Entity name</param>
@@ -26,7 +27,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         }
 
         /// <summary>
-        /// Checks if there is a Pre Image Entity mathcing the name "PreImage"
+        /// Checks if there is a Pre Image Entity matching the name "PreImage"
         /// </summary>
         /// <param name="context"></param>
         /// <returns>Boolean indicating if the Pre Image Entity exists</returns>
@@ -37,11 +38,11 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
 
         /// <summary>
         /// WARNING: this method should be avoided and the GetPreImage() method used instead.
-        /// Gets the Pre Image with the inputted named
+        /// Gets the Pre Image with the inputted name
         /// </summary>
         /// <param name="context"></param>
         /// <param name="name">The Pre Image Entity name</param>
-        /// <returns>The Pre Image Entiy</returns>
+        /// <returns>The Pre Image Entity</returns>
         /// <exception cref="ArgumentException">Exception is thrown if inputted name does not match a PreImage</exception>
         public static Entity GetPreImage(this IPluginExecutionContext context, string name, ITracingService tracer = null)
         {
@@ -52,16 +53,16 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
 
             var image = (Entity)context.PreEntityImages[name];
 
-            if (tracer != null) tracer.TraceEntity(image, name);
+            tracer?.TraceEntity(image, name);
 
             return image;
         }
 
         /// <summary>
-        /// Gets the Pre Image with the named "PreImage"
+        /// Gets the Pre Image with the name "PreImage"
         /// </summary>
         /// <param name="context"></param>
-        /// <returns>The Pre Image Entiy</returns>
+        /// <returns>The Pre Image Entity</returns>
         /// <exception cref="ArgumentException">Exception is thrown if inputted name does not match a PreImage</exception>
         public static Entity GetPreImage(this IPluginExecutionContext context, ITracingService tracer = null)
         {
@@ -72,8 +73,8 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
 
         #region "Post Image"
         /// <summary>
-        /// WARNING: this method should be avoided and the HasPostImage() method used instead.
-        /// Checks if there is a Post Image Entity mathcing the inputted name
+        /// WARNING: Prefer the parameterless overload unless a non-standard image name is required.
+        /// Checks if there is a Post Image Entity matching the inputted name
         /// </summary>
         /// <param name="context"></param>
         /// <param name="name">The Post Image Entity name</param>
@@ -84,7 +85,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         }
 
         /// <summary>
-        /// Checks if there is a Pst Image Entity mathcing the name "PostImage"
+        /// Checks if there is a Post Image Entity matching the name "PostImage"
         /// </summary>
         /// <param name="context"></param>
         /// <returns>Boolean indicating if the Post Image Entity exists</returns>
@@ -94,31 +95,36 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         }
 
         /// <summary>
-        /// WARNING: this method should be avoid and the GetPostImage() method used instead.
-        /// Gets the Post Image with the inputted named
+        /// WARNING: this method should be avoided and the GetPostImage() method used instead.
+        /// Gets the Post Image with the inputted name
         /// </summary>
         /// <param name="context"></param>
         /// <param name="name">The Post Image Entity name</param>
-        /// <returns>The Post Image Entiy</returns>
+        /// <returns>The Post Image Entity</returns>
         /// <exception cref="ArgumentException">Exception is thrown if inputted name does not match a PostImage</exception>
-        public static Entity GetPostImage(this IPluginExecutionContext context, string name)
+        public static Entity GetPostImage(this IPluginExecutionContext context, string name, ITracingService tracer = null)
         {
             if (!context.HasPostImage(name))
             {
                 throw new ArgumentException($"Post Image with name \"{name}\" does not exist.");
             }
-            return (Entity)context.PostEntityImages[name];
+
+            var image = (Entity)context.PostEntityImages[name];
+
+            tracer?.TraceEntity(image, name);
+
+            return image;
         }
 
         /// <summary>
-        /// Gets the Post Image with the named "PostImage"
+        /// Gets the Post Image with the name "PostImage"
         /// </summary>
         /// <param name="context"></param>
-        /// <returns>The Post Image Entiy</returns>
+        /// <returns>The Post Image Entity</returns>
         /// <exception cref="ArgumentException">Exception is thrown if inputted name does not match a PostImage</exception>
-        public static Entity GetPostImage(this IPluginExecutionContext context)
+        public static Entity GetPostImage(this IPluginExecutionContext context, ITracingService tracer = null)
         {
-            return context.GetPostImage(ImageNames.PostImageName);
+            return context.GetPostImage(ImageNames.PostImageName, tracer);
         }
 
         #endregion

@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace D365FL.Dataverse.PluginHelper.Core.EntityExtensions
 {
-    // TODO: Add unit tests, especially for EntityReference, OptionSetValue, and Money field comparisons
     public static class EntityFieldsHaveChangedExtensions
     {
         public static bool HasFieldChanged(
@@ -18,7 +17,6 @@ namespace D365FL.Dataverse.PluginHelper.Core.EntityExtensions
             if (modifiedEntity == null) throw new ArgumentNullException(nameof(modifiedEntity));
             if (string.IsNullOrEmpty(fieldName)) throw new ArgumentException("fieldName cannot be null or empty.", nameof(fieldName));
 
-            // TODO: Use GetAttributeValue to get values and compare
             var originalValue = originalEntity.Contains(fieldName) ? originalEntity[fieldName] : null;
             var modifiedValue = modifiedEntity.Contains(fieldName) ? modifiedEntity[fieldName] : null;
 
@@ -41,7 +39,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.EntityExtensions
         {
             if (originalEntity == null) throw new ArgumentNullException(nameof(originalEntity));
             if (modifiedEntity == null) throw new ArgumentNullException(nameof(modifiedEntity));
-            if (fieldNames == null) throw new ArgumentNullException(nameof(fieldNames));
+            if (fieldNames == null || fieldNames.Length == 0) throw new ArgumentNullException(nameof(fieldNames));
 
             var anyFieldsHaveChanged = fieldNames
                 .Any(fieldName => originalEntity.HasFieldChanged(modifiedEntity, fieldName, tracer, tracingLabel));

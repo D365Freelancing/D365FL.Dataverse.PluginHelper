@@ -1,7 +1,6 @@
 ﻿using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 using Microsoft.Xrm.Sdk;
 using System;
-using System.Runtime.Remoting.Services;
 
 namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
 {
@@ -12,62 +11,62 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
 
     public static class TargetExtensions
     {
-
+        // TODO Get ouput parameter
+        // TODO create unit test
         internal static T GetInputParameter<T>(this IPluginExecutionContext context, string parameterKey)
         {
-            if(!context.InputParameterExists(parameterKey))
-            {
-                throw new ArgumentException($"Input Parameter Key \"{parameterKey}\" does not exist ");
-            }
-
-            if (context.InputParameterIsType<T>(parameterKey) is T)
-            {
-                var typeName = typeof(T).FullName;
-                throw new ArgumentException($"Input Parameter Key \"{parameterKey}\" is not of type \"{typeName}\" ");
-            }
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (string.IsNullOrEmpty(parameterKey)) 
+                throw new ArgumentException($"parameterKey cannot be null or empty", nameof(parameterKey));
+            if (!context.InputParameterExists(parameterKey))
+                throw new ArgumentException($"Input Parameter Key \"{parameterKey}\" does not exist");
+            if (!context.InputParameterIsType<T>(parameterKey))
+                throw new ArgumentException($"Input Parameter Key \"{parameterKey}\" is not of type \"{typeof(T).FullName}\"");
 
             return (T)context.InputParameters[parameterKey];
         }
 
         internal static bool InputParameterExists(this IPluginExecutionContext context, string parameterKey)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             return context.InputParameters.ContainsKey(parameterKey);
         }
 
         internal static bool InputParameterIsType<T>(this IPluginExecutionContext context, string parameterKey)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             return context.InputParameters[parameterKey] is T;
-        }
-
-        internal static bool HasTarget<T>(this IPluginExecutionContext context)
-        {
-            return 
-                context.InputParameterExists(InputParameterNames.Target) &&
-                context.InputParameterIsType<T>(InputParameterNames.Target);
         }
 
         public static bool HasTargetEntity(this IPluginExecutionContext context)
         {
-            return HasTarget<Entity>(context);
+            return
+                context.InputParameterExists(InputParameterNames.Target) &&
+                context.InputParameterIsType<Entity>(InputParameterNames.Target);
         }
 
         public static bool HasTargetEntityReference(this IPluginExecutionContext context)
         {
-            return HasTarget<EntityReference>(context);
+            return
+               context.InputParameterExists(InputParameterNames.Target) &&
+               context.InputParameterIsType<EntityReference>(InputParameterNames.Target);
         }
 
         public static Entity GetTargetEntity(this IPluginExecutionContext context, ITracingService tracer = null)
         {
             var entity = context.GetInputParameter<Entity>(InputParameterNames.Target);
 
-            if (tracer != null) tracer.TraceEntity(entity, "Target");
-
+            tracer?.TraceEntity(entity);
             return entity;
         }
 
-        public static EntityReference GetTargetEntityReference(this IPluginExecutionContext context)
+        public static EntityReference GetTargetEntityReference(this IPluginExecutionContext context, ITracingService tracer = null)
         {
-            return context.GetInputParameter<EntityReference>(InputParameterNames.Target);
+            var entityReference = context.GetInputParameter<EntityReference>(InputParameterNames.Target);
+
+            tracer?.TraceEntityReference(entityReference);
+
+            return entityReference;
         }
     }
 }

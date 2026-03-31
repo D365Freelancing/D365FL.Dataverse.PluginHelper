@@ -38,7 +38,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             var requiredFields = new string[] { "tickersymbol", "telephone1" };
 
             var missingFields = requiredFields
-                .Where(field => !target.Contains(field) || string.IsNullOrEmpty(target.GetAttributeValue<string>(field)))
+                .Where(field => !target.Contains(field) || target[field] == null)
                 .ToList();
 
             if (missingFields.Count > 0)
@@ -90,9 +90,9 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             }
             
         }
-        private static void SetName(Entity target, ITracingService tracingService)
+        private static void SetName(Entity target, ITracingService tracer)
         {
-            var nameCalculator = new AccountNameCalculator(tracingService);
+            var nameCalculator = new AccountNameCalculator(tracer);
             var newName = nameCalculator.CalculateName(target);
 
             // Assign directly to target — Pre-Operation writes back to the database automatically

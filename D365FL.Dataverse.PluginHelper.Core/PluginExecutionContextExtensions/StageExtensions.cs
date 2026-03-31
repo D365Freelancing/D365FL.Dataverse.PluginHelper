@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xrm.Sdk;
+using System;
 
 namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
 {
@@ -13,6 +14,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
     {
         internal static bool IsStage(this IPluginExecutionContext context, int expectedStage)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             return context.Stage == expectedStage;
         }
         public static bool IsPreValidation(this IPluginExecutionContext context)

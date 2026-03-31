@@ -1,7 +1,7 @@
 ﻿using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
-using Microsoft.Crm.Sdk.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xrm.Sdk;
+using System;
 
 namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
 {
@@ -29,6 +29,38 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
 
             return hasChanged;
         }
+
+        #region "Missing Values Test"
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsTrue_WhenColumnIsAbsentFromOriginalButPresentInModified()
+        {
+            var columnName = "test";
+            var original = new Entity();
+            var modified = new Entity();
+            modified.Attributes.Add(columnName, true);
+
+            var result = original.HasFieldChanged(modified, columnName);
+
+            Assert.IsTrue(result, "HasFieldChanged DID NOT return true when column is absent from original but present in modified");
+        }
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsTrue_WhenColumnIsAbsentFromModifiedButPresentInOriginal()
+        {
+            var columnName = "test";
+            var original = new Entity();
+            var modified = new Entity();
+            original.Attributes.Add(columnName, true);
+
+            var result = original.HasFieldChanged(modified, columnName);
+
+            Assert.IsTrue(result, "HasFieldChanged DID NOT return true when column is absent from modified but present in original");
+
+            // TODO think about if this should be false or not
+        }
+
+        #endregion
 
 
         #region "String Field Tests"
@@ -88,7 +120,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
         #region "Money Field Tests"
 
         [TestMethod]
-        public void HasFieldChange_ReturnsTrue_WhenMoneyFieldHasChanged()
+        public void HasFieldChange_ReturnsTrue_WhenMoneyAndFieldHasChanged()
         {
 
             var result = HasChanged(new Money(50000.00m), new Money(50000.01m));
@@ -98,7 +130,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
         }
 
         [TestMethod]
-        public void HasFieldChange_ReturnsTrue_WhenMoneyOriginalIsNull()
+        public void HasFieldChange_ReturnsTrue_WhenMoneyAndOriginalIsNull()
         {
 
             var result = HasChanged(null, new Money(50000.00m));
@@ -108,7 +140,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
         }
 
         [TestMethod]
-        public void HasFieldChange_ReturnsTrue_WhenMoneyModifiedIsNull()
+        public void HasFieldChange_ReturnsTrue_WhenMoneyAndModifiedIsNull()
         {
 
             var result = HasChanged(new Money(50000.00m), null);
@@ -118,7 +150,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
         }
 
         [TestMethod]
-        public void HasFieldChange_ReturnsFalse_WhenMoneyBothAreSameValue()
+        public void HasFieldChange_ReturnsFalse_WhenMoneyAndBothAreSameValue_ByReference()
         {
             var value = new Money(50000.00m);
             var result = HasChanged(value, value);
@@ -128,7 +160,16 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
         }
 
         [TestMethod]
-        public void HasFieldChange_ReturnsFalse_WhenMoneyBothAreNull()
+        public void HasFieldChange_ReturnsFalse_WhenMoneyAndBothAreSameValue_ByValue()
+        {
+            var result = HasChanged(new Money(50000.00m), new Money(50000.00m));
+
+            // ASSERT
+            Assert.IsFalse(result, "HasFieldChange DID NOT return false when both are same value");
+        }
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsFalse_WhenMoneyAndBothAreNull()
         {
 
             var result = HasChanged(null, null);
@@ -139,8 +180,103 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
 
         #endregion
 
+        #region "Entity Reference Test"
 
+        [TestMethod]
+        public void HasFieldChange_ReturnsTrue_WhenEntityReferenceAndFieldHasChanged()
+        {
+            var originalValue = new EntityReference("account", Guid.NewGuid());
+            var newValue = new EntityReference("account", Guid.NewGuid());
+            var result = HasChanged(originalValue, newValue);
 
+            // ASSERT
+            Assert.IsTrue(result, "HasFieldChange DID NOT return true when EntityReference field has changed");
+        }
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsFalse_WhenEntityReferenceAndBothAreSameValue()
+        {
+            var id = Guid.NewGuid();
+            var value1 = new EntityReference("account", id);
+            var value2 = new EntityReference("account", id);
+            var result = HasChanged(value1, value2);
+
+            // ASSERT
+            Assert.IsFalse(result, "HasFieldChange DID NOT return false when both are same value");
+        }
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsFalse_WhenEntityReferenceAndBothAreSameValue_ByReference()
+        {
+
+            var value = new EntityReference("account", Guid.NewGuid());
+            var result = HasChanged(value, value);
+
+            // ASSERT
+            Assert.IsFalse(result, "HasFieldChange DID NOT return false when both are same value");
+        }
+
+        // TODO test entity references with unique key vaulses
+
+        #endregion
+
+        #region "OptionSets Test"
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsTrue_WhenOptionSetAndFieldHasChanged()
+        {
+            var result = HasChanged(new OptionSetValue(1), new OptionSetValue(2));
+
+            // ASSERT
+            Assert.IsTrue(result, "HasFieldChange DID NOT return true when OptionSetValue field has changed");
+        }
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsFalse_WhenOptionSetAndBothAreSameValue_ByReference()
+        {
+            var value = new OptionSetValue(1);
+            var result = HasChanged(value, value);
+
+            // ASSERT
+            Assert.IsFalse(result, "HasFieldChange DID NOT return false when both are same value");
+        }
+        
+        [TestMethod]
+        public void HasFieldChange_ReturnsFalse_WhenOptionSetAndBothAreSameValue()
+        {
+            var value1 = new OptionSetValue(1);
+            var value2 = new OptionSetValue(1);
+            var result = HasChanged(value1, value2);
+
+            // ASSERT
+            Assert.IsFalse(result, "HasFieldChange DID NOT return false when both are same value");
+        }
+
+        #endregion
+
+        // TODO test yes no feilds or are they booleans
+
+        #region "Boolean Field Tests"
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsTrue_WhenBooleanAndFieldHasChanged()
+        {
+            var result = HasChanged(false, true);
+
+            // ASSERT
+            Assert.IsTrue(result, "HasFieldChanged DID NOT return true when boolean field has changed");
+        }
+
+        [TestMethod]
+        public void HasFieldChange_ReturnsFalse_WhenBooleanAndBothAreSameValue()
+        {
+            var result = HasChanged(true, true);
+
+            // ASSERT
+            Assert.IsFalse(result, "HasFieldChanged DID NOT return false when both boolean values are the same");
+        }
+
+        #endregion
 
     }
 }
