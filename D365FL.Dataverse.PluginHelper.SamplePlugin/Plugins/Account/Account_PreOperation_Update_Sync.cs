@@ -2,9 +2,9 @@
 using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account;
 using Microsoft.Xrm.Sdk;
 using System.Text.Json;
+using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 {
@@ -63,7 +63,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             var preImage = context.GetPreImage(tracer);
 
             // Merge preImage and target entity to ensure logic does not fail because of missing field values
-            var fullEntity = preImage.Merge(target);
+            var fullEntity = preImage.Merge(target, tracer);
 
             Execute(target, preImage, fullEntity, tracer);
         }
@@ -72,6 +72,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
         {
             try
             {
+                ValidateRequiredFields(fullEntity);
                 SetName(target, preImage, fullEntity, tracer);
             }
             catch (InvalidPluginExecutionException ex)
@@ -88,12 +89,12 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             }
         }
 
-        private void SetName(Entity target, Entity preImage, Entity fullEntity, ITracingService tracer)
+        private void SetName(Entity target, Entity preImage, Entity fullEntity, ITracingService tracer = null)
         {
             if (!SetNameTriggered(target, preImage))
             {
                 // only set name if fields that are used to calculate the name have changed.
-                tracer.Trace("Set Name fields have not changed, therefore existing and NOT calculating new name");
+                tracer?.Trace("Set Name fields have not changed, therefore existing and NOT calculating new name");
                 return;
             }
 
@@ -112,6 +113,12 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             var triggered = preImage.HaveAnyFieldsChanged(target, requiredFields);
 
             return triggered;
+        }
+
+        private void ValidateRequiredFields(Entity target, ITracingService tracer = null)
+        {
+            var validator = new ValidateRequiredFieldsCommand(tracer);
+            validator.ValidateRequiredFields(target);
         }
     }
 }

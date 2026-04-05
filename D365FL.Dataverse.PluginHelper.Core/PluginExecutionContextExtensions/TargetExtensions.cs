@@ -56,7 +56,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         {
             var entity = context.GetInputParameter<Entity>(InputParameterNames.Target);
 
-            tracer?.TraceEntity(entity);
+            tracer?.TraceEntity(entity, InputParameterNames.Target);
             return entity;
         }
 
@@ -64,7 +64,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions
         {
             var entityReference = context.GetInputParameter<EntityReference>(InputParameterNames.Target);
 
-            tracer?.TraceEntityReference(entityReference);
+            tracer?.TraceEntityReference(entityReference, InputParameterNames.Target);
 
             return entityReference;
         }

@@ -66,7 +66,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
 
             var isValid = false;
             if (_context.HasTargetEntity())
-                isValid = _context.GetTargetEntity(_tracer).LogicalName == expectedName;
+                isValid = _context.GetTargetEntity().LogicalName == expectedName;
             
             _rules.Add(ruleName, isValid);
 
@@ -161,6 +161,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
 
         public bool IsValid => _rules.All(r => r.Value);
 
+        // TODO test will null tracer
         public void TraceRules(string tracingLabel = "RuleValidation")
         {
             var invalidRules = GetRuleDictionary().Where(r => !r.Value).ToList();

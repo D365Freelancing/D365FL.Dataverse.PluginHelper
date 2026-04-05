@@ -416,3 +416,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/D365FL.Dataverse.PluginHelper.Core.TestHarness/App.config
+/D365FL.Dataverse.PluginHelper.Core.IntegrationTests/app.config

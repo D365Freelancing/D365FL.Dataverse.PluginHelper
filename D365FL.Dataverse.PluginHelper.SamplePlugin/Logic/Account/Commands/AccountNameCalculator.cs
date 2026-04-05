@@ -2,7 +2,7 @@
 using System;
 using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 
-namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account
+namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands
 {
     public class AccountNameCalculator
     {
@@ -14,17 +14,18 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account
 
         public string CalculateName(Entity account)
         {
+            if (account == null) throw new ArgumentNullException(nameof(account));
 
             _tracer?.TraceWithKey("CalculateAccountName", "calculating name");
 
-            string tickerSymbol = account.Contains("tickersymbol") ? account["tickersymbol"].ToString() : null;
-            string phone = account.Contains("telephone1") ? account["telephone1"].ToString() : null;
+            string tickerSymbol = account.GetAttributeValue<string>("tickersymbol");
+            string telephone1 = account.GetAttributeValue<string>("telephone1"); 
 
-            if (tickerSymbol == null || phone == null)
-                throw new ArgumentException("tickerSymbol and phone are required to calculate account name");
+            if (tickerSymbol == null || telephone1 == null)
+                throw new ArgumentException("tickerSymbol and telephone1 are required to calculate account name");
 
             _tracer?.TraceWithKey("CalculateAccountName", "name calculated");
-            return $"{tickerSymbol} - {phone}";
+            return $"{tickerSymbol} - {telephone1}";
         }
     }
 }

@@ -43,6 +43,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A62E
 		Documentation\Samples\SetStateDynamicEntity.md = Documentation\Samples\SetStateDynamicEntity.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{AB634CC8-AFEB-42CB-926E-3CF036905C65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D365FL.Dataverse.PluginHelper.Core.TestHarness", "D365FL.Dataverse.PluginHelper.Core.TestHarness\D365FL.Dataverse.PluginHelper.Core.TestHarness.csproj", "{AB98AFB7-C38C-400E-A92E-8D5D82154687}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D365FL.Dataverse.PluginHelper.Core.IntegrationTests", "D365FL.Dataverse.PluginHelper.Core.IntegrationTests\D365FL.Dataverse.PluginHelper.Core.IntegrationTests.csproj", "{9BA38091-D284-4565-B664-3B8F63281844}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +67,14 @@ Global
 		{F92B2D73-767E-4CFD-83DC-C13F002F1A82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F92B2D73-767E-4CFD-83DC-C13F002F1A82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F92B2D73-767E-4CFD-83DC-C13F002F1A82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB98AFB7-C38C-400E-A92E-8D5D82154687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB98AFB7-C38C-400E-A92E-8D5D82154687}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB98AFB7-C38C-400E-A92E-8D5D82154687}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB98AFB7-C38C-400E-A92E-8D5D82154687}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BA38091-D284-4565-B664-3B8F63281844}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BA38091-D284-4565-B664-3B8F63281844}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BA38091-D284-4565-B664-3B8F63281844}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BA38091-D284-4565-B664-3B8F63281844}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +82,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F92B2D73-767E-4CFD-83DC-C13F002F1A82} = {369FF3AC-91F1-4C9D-9959-BAD1E70A2DD8}
 		{A62E9A03-0DB0-4B7A-AFAE-D821567A9284} = {E53EDAD1-F515-4B64-99E0-E968C186D010}
+		{AB98AFB7-C38C-400E-A92E-8D5D82154687} = {369FF3AC-91F1-4C9D-9959-BAD1E70A2DD8}
+		{9BA38091-D284-4565-B664-3B8F63281844} = {369FF3AC-91F1-4C9D-9959-BAD1E70A2DD8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1DE04C78-1AC7-4B5A-99C1-0523EA0503F2}

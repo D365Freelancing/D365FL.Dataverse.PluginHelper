@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 
-
 namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
 {
     public static class TraceEntityExtensions
@@ -11,9 +10,11 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
         {
             if (tracer == null) throw new ArgumentNullException(nameof(tracer));
 
+            tracer.TraceWithKey(label, "");
+
             if (entity == null)
             {
-                tracer.Trace($"[{label}] Entity is null.");
+                tracer.TraceWithKey(label, "Entity is null.");
                 return;
             }
 
@@ -69,10 +70,12 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
         public static void TraceEntityReference(this ITracingService tracer, EntityReference entityRef, string label = "EntityReference")
         {
             if (tracer == null) throw new ArgumentNullException(nameof(tracer));
+            
+            tracer.TraceWithKey(label, "");
 
             if (entityRef == null)
             {
-                tracer.Trace($"[{label}] is null.");
+                tracer.TraceWithKey(label, "EntityReference is null.");
                 return;
             }
 

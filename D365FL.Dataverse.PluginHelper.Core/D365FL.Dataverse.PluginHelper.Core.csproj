@@ -92,6 +92,7 @@
     <Compile Include="EntityExtensions\EntityFieldsHaveChangedExtensions.cs" />
     <Compile Include="EntityExtensions\MergeEntityExtensions.cs" />
     <Compile Include="IServiceProviderExtension.cs" />
+    <Compile Include="IEnumerableExtensions\ChunkifyExtension.cs" />
     <Compile Include="PluginExecutionContextExtensions\MessageExtensions.cs" />
     <Compile Include="PluginExecutionContextExtensions\ModeExtensions.cs" />
     <Compile Include="PluginExecutionContextExtensions\StageExtensions.cs" />

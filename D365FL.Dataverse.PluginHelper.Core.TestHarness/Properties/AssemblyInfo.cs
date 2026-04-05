@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("D365FL.Dataverse.PluginHelper.Core")]
+[assembly: AssemblyTitle("D365FL.Dataverse.PluginHelper.Core.TestHarness")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("D365 Freelancing - https://www.d365freelancing.com/")]
-[assembly: AssemblyProduct("D365FL.Dataverse.PluginHelper.Core")]
+[assembly: AssemblyProduct("D365FL.Dataverse.PluginHelper.Core.TestHarness")]
 [assembly: AssemblyCopyright("Copyright ©  2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("03c7df94-a77a-4f86-bddd-9f3c25f8d43e")]
+[assembly: Guid("ab98afb7-c38c-400e-a92e-8d5d82154687")]
 
 // Version information for an assembly consists of the following four values:
 //
