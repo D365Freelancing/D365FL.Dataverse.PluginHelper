@@ -240,7 +240,5 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.TracingServiceExtensions
             var actualOutput = tracer.TraceLogs;
             Assert.IsTrue(actualOutput.Contains($"[{Label}] Attribute Count: {expectedAttributeCount}"), "Attribute Count not logged");
         }
-
-        // TODO do Yes/No fields need to be tested
     }
 }

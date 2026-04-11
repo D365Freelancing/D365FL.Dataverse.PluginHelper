@@ -161,7 +161,6 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
 
         public bool IsValid => _rules.All(r => r.Value);
 
-        // TODO test will null tracer
         public void TraceRules(string tracingLabel = "RuleValidation")
         {
             var invalidRules = GetRuleDictionary().Where(r => !r.Value).ToList();

@@ -254,8 +254,6 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
 
         #endregion
 
-        // TODO test yes no feilds or are they booleans
-
         #region "Boolean Field Tests"
 
         [TestMethod]

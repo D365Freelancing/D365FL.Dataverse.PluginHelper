@@ -16,8 +16,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands
         {
             if (target == null) throw new ArgumentNullException(nameof(target));
 
-            // TODO Create unit tests
-            // TODO create integration tests
             // TODO make this a generic class to be used accross multiple entities
             // TODO add tracing comments if tracer is not null
 
