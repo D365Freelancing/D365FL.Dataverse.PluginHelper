@@ -181,7 +181,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="app.config" />
     <Content Include="appsettings.sample.config" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -192,7 +192,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="appsettings.config" />
+    <Content Include="appsettings.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
