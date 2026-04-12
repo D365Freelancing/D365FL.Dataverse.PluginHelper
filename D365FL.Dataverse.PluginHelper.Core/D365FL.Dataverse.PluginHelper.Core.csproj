@@ -90,6 +90,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ValidateRequiredFieldsCommand.cs" />
+    <Compile Include="EntityExtensions\CloneEntityExtensions.cs" />
+    <Compile Include="EntityExtensions\CopyEntityExtensions.cs" />
     <Compile Include="EntityExtensions\EntityFieldsHaveChangedExtensions.cs" />
     <Compile Include="EntityExtensions\MergeEntityExtensions.cs" />
     <Compile Include="IServiceProviderExtension.cs" />
@@ -103,6 +105,7 @@
     <Compile Include="Rules\RuleFactory.cs" />
     <Compile Include="TracingServiceExtension\TraceEntityExtensions.cs" />
     <Compile Include="TracingServiceExtension\TraceWithKeyExtensions.cs" />
+    <Compile Include="TracingServiceExtension\TracingEntityColumnExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

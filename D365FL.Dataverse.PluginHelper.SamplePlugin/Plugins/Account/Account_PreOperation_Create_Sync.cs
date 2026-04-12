@@ -30,7 +30,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             }
         }
 
-
         // Entry point for custom business logic execution
         protected override void ExecuteDataversePlugin(ILocalPluginContext localPluginContext)
         {
@@ -46,16 +45,17 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 
             var target = context.GetTargetEntity(tracer);
 
-            Execute(target, tracer);
-        }
-
-        private void Execute(Entity target, ITracingService tracer)
-        {
             try
             {
                 ValidateRequiredFields(target);
 
-                SetName(target, tracer);
+                var nameCalculator = new AccountNameCalculator(tracer);
+
+                // Assign directly to target —
+                // Pre-Operation writes back to the database automatically
+
+                // Name calculation fields are required, therefore no SetNameTriggered check is required
+                target["name"] = nameCalculator.CalculateName(target);
             }
             catch (InvalidPluginExecutionException ex)
             {
@@ -69,22 +69,12 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 tracer.Trace("Plugin Error: {0}", ex.ToString());
                 throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
-
-        }
-        private void SetName(Entity target, ITracingService tracer)
-        {
-            var nameCalculator = new AccountNameCalculator(tracer);
-            var newName = nameCalculator.CalculateName(target);
-
-            // Assign directly to target — Pre-Operation writes back to the database automatically
-            target["name"] = newName;
         }
 
         private void ValidateRequiredFields(Entity target, ITracingService tracer = null)
         {
             var validator = new ValidateAccountRequiredFieldsCommand(tracer);
             validator.ValidateRequiredFields(target);
-
         }
     }
 }

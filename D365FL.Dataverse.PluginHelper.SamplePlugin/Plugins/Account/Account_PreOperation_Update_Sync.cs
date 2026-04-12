@@ -72,7 +72,19 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             try
             {
                 ValidateRequiredFields(fullEntity);
-                SetName(target, preImage, fullEntity, tracer);
+
+                var nameCalculator = new AccountNameCalculator(tracer);
+
+                var entityUpdates = target.EmptyClone();
+
+                if (SetNameTriggered(target, preImage))
+                    entityUpdates["name"] = nameCalculator.CalculateName(fullEntity);
+
+                // Copy changed field value to target if they have changed (not fullEntity) —
+                // Pre-Operation writes target back to the database automatically
+                var deltas = target.GetChangedFields(entityUpdates);
+                deltas.CopyAttributeValues(target, tracer);
+
             }
             catch (InvalidPluginExecutionException ex)
             {
@@ -86,22 +98,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 tracer.Trace("Plugin Error: {0}", ex.ToString());
                 throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
-        }
-
-        private void SetName(Entity target, Entity preImage, Entity fullEntity, ITracingService tracer = null)
-        {
-            if (!SetNameTriggered(target, preImage))
-            {
-                // only set name if fields that are used to calculate the name have changed.
-                tracer?.Trace("Set Name fields have not changed, therefore existing and NOT calculating new name");
-                return;
-            }
-
-            var nameCalculator = new AccountNameCalculator(tracer);
-            var newName = nameCalculator.CalculateName(fullEntity);
-
-            // Assign to target (not fullEntity) — Pre-Operation writes target back to the database automatically
-            target["name"] = newName;
         }
 
         private bool SetNameTriggered(Entity target, Entity preImage)

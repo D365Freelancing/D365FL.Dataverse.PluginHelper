@@ -25,7 +25,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
             foreach (var attribute in entity.Attributes)
             {
                 var attributeName = attribute.Key;
-                var attributeValue = GetAttributeValue(attribute);
+                var attributeValue = attribute.GetTraceableValue();
                 var attributeType = GetAttributeType(attribute);
 
                 tracer.TraceWithKey(label, $" {attributeName}: [{attributeType}] {attributeValue}");
@@ -35,36 +35,6 @@ namespace D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension
         private static string GetAttributeType(KeyValuePair<string, object> attribute)
         {
             return attribute.Value?.GetType().Name ?? "null";
-        }
-
-        private static string GetAttributeValue(KeyValuePair<string, object> attr)
-        {
-            string attributeValue = null;
-            switch (attr.Value)
-            {
-                case EntityReference er:
-                    var name = !string.IsNullOrEmpty(er.Name) ? er.Name : "NOT SET";
-                    attributeValue = $"EntityReference(LogicalName={er.LogicalName}, Id={er.Id}, Name={name})";
-                    // TODO handle Key Value Pair Ids
-                    break;
-                case OptionSetValue osv:
-                    attributeValue = $"OptionSetValue({osv.Value})";
-                    break;
-                case Money money:
-                    attributeValue = $"Money({money.Value})";
-                    break;
-                case AliasedValue av:
-                    attributeValue = $"AliasedValue({av.EntityLogicalName}.{av.AttributeLogicalName} = {av.Value})";
-                    break;
-                case null:
-                    attributeValue = "null";
-                    break;
-                default:
-                    attributeValue = attr.Value.ToString();
-                    break;
-            }
-
-            return attributeValue;
         }
 
         public static void TraceEntityReference(this ITracingService tracer, EntityReference entityRef, string label = "EntityReference")
