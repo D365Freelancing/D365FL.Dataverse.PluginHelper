@@ -89,6 +89,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ValidateRequiredFieldsCommand.cs" />
     <Compile Include="EntityExtensions\EntityFieldsHaveChangedExtensions.cs" />
     <Compile Include="EntityExtensions\MergeEntityExtensions.cs" />
     <Compile Include="IServiceProviderExtension.cs" />

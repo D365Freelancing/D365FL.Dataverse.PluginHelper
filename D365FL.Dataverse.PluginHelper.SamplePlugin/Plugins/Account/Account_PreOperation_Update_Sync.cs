@@ -8,7 +8,6 @@ using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 {
-
     public class Account_PreOperation_Update_Sync : PluginBase
     {
         private class SecureConfig
@@ -117,7 +116,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 
         private void ValidateRequiredFields(Entity target, ITracingService tracer = null)
         {
-            var validator = new ValidateRequiredFieldsCommand(tracer);
+            var validator = new ValidateAccountRequiredFieldsCommand(tracer);
             validator.ValidateRequiredFields(target);
         }
     }

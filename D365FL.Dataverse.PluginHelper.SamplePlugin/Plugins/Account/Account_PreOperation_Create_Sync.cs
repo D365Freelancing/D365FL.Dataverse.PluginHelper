@@ -82,7 +82,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 
         private void ValidateRequiredFields(Entity target, ITracingService tracer = null)
         {
-            var validator = new ValidateRequiredFieldsCommand(tracer);
+            var validator = new ValidateAccountRequiredFieldsCommand(tracer);
             validator.ValidateRequiredFields(target);
 
         }
