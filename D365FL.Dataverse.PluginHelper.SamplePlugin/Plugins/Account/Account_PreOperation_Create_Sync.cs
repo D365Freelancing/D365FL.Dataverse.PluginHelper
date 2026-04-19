@@ -1,4 +1,5 @@
 ﻿using System;
+using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
 using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands;
@@ -44,7 +45,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             ValidateConfig(context, tracer);
 
             var target = context.GetTargetEntity(tracer);
-
+            var accountUpdates = target.EmptyClone();
             try
             {
                 ValidateRequiredFields(target);
@@ -55,7 +56,13 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 // Pre-Operation writes back to the database automatically
 
                 // Name calculation fields are required, therefore no SetNameTriggered check is required
-                target["name"] = nameCalculator.CalculateName(target);
+                //target["name"] = nameCalculator.CalculateName(target);
+                accountUpdates["name"] = nameCalculator.CalculateName(target);
+
+                // Copy changed field value to target if they have changed.
+                // Pre-Operation writes target back to the database automatically
+                var deltas = target.GetChangedFields(accountUpdates);
+                deltas.CopyAttributeValues(target, tracer);
             }
             catch (InvalidPluginExecutionException ex)
             {

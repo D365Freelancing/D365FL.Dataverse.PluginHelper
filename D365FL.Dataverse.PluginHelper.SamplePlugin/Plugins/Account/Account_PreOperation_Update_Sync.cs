@@ -60,29 +60,23 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 
             var target = context.GetTargetEntity(tracer);
             var preImage = context.GetPreImage(tracer);
+            var accountUpdates = target.EmptyClone();
 
             // Merge preImage and target entity to ensure logic does not fail because of missing field values
             var fullEntity = preImage.Merge(target, tracer);
 
-            Execute(target, preImage, fullEntity, tracer);
-        }
-
-        private void Execute(Entity target, Entity preImage, Entity fullEntity, ITracingService tracer)
-        {
             try
             {
                 ValidateRequiredFields(fullEntity);
 
-                var nameCalculator = new AccountNameCalculator(tracer);
-
-                var entityUpdates = target.EmptyClone();
+                var nameCalculator = new AccountNameCalculator(tracer);             
 
                 if (SetNameTriggered(target, preImage))
-                    entityUpdates["name"] = nameCalculator.CalculateName(fullEntity);
+                    accountUpdates["name"] = nameCalculator.CalculateName(fullEntity);
 
-                // Copy changed field value to target if they have changed (not fullEntity) —
+                // Copy changed field value to target if they have changed.
                 // Pre-Operation writes target back to the database automatically
-                var deltas = target.GetChangedFields(entityUpdates);
+                var deltas = target.GetChangedFields(accountUpdates);
                 deltas.CopyAttributeValues(target, tracer);
 
             }
