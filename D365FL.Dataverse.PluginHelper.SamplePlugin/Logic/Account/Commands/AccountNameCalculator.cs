@@ -12,6 +12,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands
             _tracer = tracer;
         }
 
+        // TODO consider adding properties for the required fields instead of passing the account
         public string CalculateName(Entity account)
         {
             if (account == null) throw new ArgumentNullException(nameof(account));

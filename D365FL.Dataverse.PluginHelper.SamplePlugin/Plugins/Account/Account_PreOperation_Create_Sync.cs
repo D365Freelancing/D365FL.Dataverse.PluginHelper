@@ -56,7 +56,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 // Pre-Operation writes back to the database automatically
 
                 // Name calculation fields are required, therefore no SetNameTriggered check is required
-                //target["name"] = nameCalculator.CalculateName(target);
                 accountUpdates["name"] = nameCalculator.CalculateName(target);
 
                 // Copy changed field value to target if they have changed.

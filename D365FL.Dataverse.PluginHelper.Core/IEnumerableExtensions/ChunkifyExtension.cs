@@ -24,5 +24,15 @@ namespace D365FL.Dataverse.PluginHelper.Core.IEnumerableExtensions
             if (chunk.Count > 0)
                 yield return chunk;
         }
+
+        // TODO maybe this is a better chunkify method
+        //private List<List<T>> Chunkify<T>(List<T> source, int chunkSize)
+        //{
+        //    return source
+        //        .Select((item, index) => new { item, index })
+        //        .GroupBy(x => x.index / chunkSize)
+        //        .Select(g => g.Select(x => x.item).ToList())
+        //        .ToList();
+        //}
     }
 }

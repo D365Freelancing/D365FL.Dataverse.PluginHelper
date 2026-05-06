@@ -1,10 +1,8 @@
 ﻿using System;
-using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
 using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
 using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Queries;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account;
 using Microsoft.Xrm.Sdk;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
@@ -50,6 +48,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 
             try
             {
+                // TODO update plugin is required to update d365fl_contactcount of the accounts of the original and new parentCustomerId 
                 var parentCustomerId = GetParentCustomerId(target, tracer);
 
                 if (parentCustomerId != Guid.Empty)
@@ -75,7 +74,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
                 tracer.Trace("Plugin Error: {0}", ex.ToString());
                 throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
-            // Only save modified fields
         }
 
         private Guid GetParentCustomerId(Entity target, ITracingService tracer = null)
