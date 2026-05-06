@@ -9,12 +9,23 @@ using D365FL.Dataverse.PluginHelper.Core.IEnumerableExtensions;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Configuration;
 
 namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests
 {
     [TestClass]
     public class AssemblyLifecycle
     {
+        private static bool _skipPerformanceTests = false;
+        private static bool _skipPerformanceTestsSet = false;
+        public static bool SkipPerformanceTests { get { 
+                if(!_skipPerformanceTestsSet)
+                {
+                    _skipPerformanceTests = bool.Parse(ConfigurationManager.AppSettings["SkipPerformanceTests"]);
+                    _skipPerformanceTestsSet = true;
+                }
+                return _skipPerformanceTests;
+            } }
         public static ServiceClient OrgService { get; private set; } = null;
 
         private static ConcurrentBag<EntityReference> _entitiesToDelete = new ConcurrentBag<EntityReference>();
@@ -24,6 +35,11 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests
             AddEntityToDelete(entity.LogicalName, id);
 
             return id;
+        }
+
+        public static void UpdateEntity(Entity entity)
+        {
+            OrgService.Update(entity);
         }
         public static Guid CreateAndTrackEntity(CreateRequest request)
         {

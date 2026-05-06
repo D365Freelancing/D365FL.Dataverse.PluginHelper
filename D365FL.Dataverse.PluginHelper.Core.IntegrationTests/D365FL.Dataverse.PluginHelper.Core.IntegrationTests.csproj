@@ -179,7 +179,9 @@
     <Compile Include="Dependencies\ServiceClientFactory.cs" />
     <Compile Include="Plugins\Account\Account_PreOperation_Update_Sync_ExecuteDataversePlugin.cs" />
     <Compile Include="Plugins\Account\Account_PreOperation_Create_Sync_ExecuteDataversePlugin.cs" />
+    <Compile Include="Plugins\Contact\ContactTestHelpers.cs" />
     <Compile Include="Plugins\Contact\Contact_PostOperation_Create_Sync_ExecuteDataversePlugin.cs" />
+    <Compile Include="Plugins\Contact\Contact_PostOperation_Update_Sync_ExecuteDataversePlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
