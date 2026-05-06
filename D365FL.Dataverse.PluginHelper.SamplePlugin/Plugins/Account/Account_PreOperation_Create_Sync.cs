@@ -55,8 +55,8 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 // Assign directly to target —
                 // Pre-Operation writes back to the database automatically
 
-                // Name calculation fields are required, therefore no SetNameTriggered check is required
-                accountUpdates["name"] = nameCalculator.CalculateName(target);
+                accountUpdates["name"] = nameCalculator.CalculateName(target); // Name calculation fields are required, therefore no SetNameTriggered check is required
+                accountUpdates["d365fl_contactcount"] = 0; // default the contact count to 0
 
                 // Copy changed field value to target if they have changed.
                 // Pre-Operation writes target back to the database automatically
