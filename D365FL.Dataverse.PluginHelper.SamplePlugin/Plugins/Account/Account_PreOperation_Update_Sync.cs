@@ -4,7 +4,6 @@ using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
 using Microsoft.Xrm.Sdk;
 using System.Text.Json;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 {
@@ -65,19 +64,18 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             // Merge preImage and target entity to ensure logic does not fail because of missing field values
             var fullEntity = preImage.Merge(target, tracer);
 
+            var helper = new AccountPreOperationPluginHelper(tracer);
+
             try
             {
-                ValidateRequiredFields(fullEntity);
+                helper.ValidateRequiredFields(fullEntity);
 
-                var nameCalculator = new AccountNameCalculator(tracer);             
-
-                if (SetNameTriggered(target, preImage))
-                    accountUpdates["name"] = nameCalculator.CalculateName(fullEntity);
+                if (helper.AreNameFieldsDirty(target, preImage))
+                    helper.SetName(fullEntity, accountUpdates);
 
                 // Copy changed field value to target if they have changed.
                 // Pre-Operation writes target back to the database automatically
-                var deltas = target.GetChangedFields(accountUpdates);
-                deltas.CopyAttributeValues(target, tracer);
+                helper.CopyChangedFieldsToTarget(target, accountUpdates);
 
             }
             catch (InvalidPluginExecutionException ex)
@@ -92,22 +90,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 tracer.Trace("Plugin Error: {0}", ex.ToString());
                 throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
-        }
-
-        private bool SetNameTriggered(Entity target, Entity preImage)
-        {
-            // Check fields impacting account name have changed before recalculating the name.
-            var requiredFields = new[] { "tickersymbol", "telephone1" };
-
-            var triggered = preImage.HaveAnyFieldsChanged(target, requiredFields);
-
-            return triggered;
-        }
-
-        private void ValidateRequiredFields(Entity target, ITracingService tracer = null)
-        {
-            var validator = new ValidateAccountRequiredFieldsCommand(tracer);
-            validator.ValidateRequiredFields(target);
         }
     }
 }

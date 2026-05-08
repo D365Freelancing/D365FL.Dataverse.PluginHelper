@@ -2,7 +2,6 @@
 using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands;
 using Microsoft.Xrm.Sdk;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
@@ -45,23 +44,23 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
             ValidateConfig(context, tracer);
 
             var target = context.GetTargetEntity(tracer);
-            var accountUpdates = target.EmptyClone();
+            var accountToUpdate = target.EmptyClone();
+
+            var helper = new AccountPreOperationPluginHelper(tracer);
             try
             {
-                ValidateRequiredFields(target);
-
-                var nameCalculator = new AccountNameCalculator(tracer);
+                helper.ValidateRequiredFields(target);
 
                 // Assign directly to target —
                 // Pre-Operation writes back to the database automatically
 
-                accountUpdates["name"] = nameCalculator.CalculateName(target); // Name calculation fields are required, therefore no SetNameTriggered check is required
-                accountUpdates["d365fl_contactcount"] = 0; // default the contact count to 0
+                helper.SetName(target, accountToUpdate); // Name calculation fields are required, therefore no SetNameTriggered check is required
+
+                helper.DefaultContactCountToZero(accountToUpdate); // default the contact count to 0
 
                 // Copy changed field value to target if they have changed.
                 // Pre-Operation writes target back to the database automatically
-                var deltas = target.GetChangedFields(accountUpdates);
-                deltas.CopyAttributeValues(target, tracer);
+                helper.CopyChangedFieldsToTarget(target, accountToUpdate);
             }
             catch (InvalidPluginExecutionException ex)
             {
@@ -75,12 +74,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 tracer.Trace("Plugin Error: {0}", ex.ToString());
                 throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
-        }
-
-        private void ValidateRequiredFields(Entity target, ITracingService tracer = null)
-        {
-            var validator = new ValidateAccountRequiredFieldsCommand(tracer);
-            validator.ValidateRequiredFields(target);
         }
     }
 }

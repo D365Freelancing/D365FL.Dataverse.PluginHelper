@@ -9,7 +9,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
     public class Contact_PostOperation_Update_Sync : PluginBase
     {
         public Contact_PostOperation_Update_Sync(string unsecureConfiguration, string secureConfiguration)
-          : base(typeof(Contact_PostOperation_Create_Sync))
+          : base(typeof(Contact_PostOperation_Update_Sync))
         {
 
         }
@@ -27,7 +27,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 
             if (!rules.IsValid)
             {
-                throw new SystemException("Plugin is not configured correctly");
+                throw new InvalidPluginExecutionException("Plugin is not configured correctly");
             }
         }
 
@@ -50,10 +50,8 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
             try
             {
 
-                if (helper.CalculateContactCountTriggered(target, preImage))
+                if (helper.AreContactCountFieldsDirty(target, preImage))
                 {
-                    var counter = new SetChildContactCountCommand(localPluginContext.InitiatingUserService, tracer);
-
                     var newParentCustomerId = helper.GetParentCustomerId(target); // new account id
                     var oldParentCustomerId = helper.GetParentCustomerId(preImage); // old account id
                     helper.UpdateChildContactCountOnAccount(new Guid[] { oldParentCustomerId, newParentCustomerId }); // update child contact count on the old and new account

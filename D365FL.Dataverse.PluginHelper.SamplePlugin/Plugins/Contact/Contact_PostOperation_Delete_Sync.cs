@@ -8,7 +8,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
     public class Contact_PostOperation_Delete_Sync : PluginBase
     {
         public Contact_PostOperation_Delete_Sync(string unsecureConfiguration, string secureConfiguration)
-          : base(typeof(Contact_PostOperation_Create_Sync))
+          : base(typeof(Contact_PostOperation_Delete_Sync))
         {
 
         }
@@ -26,7 +26,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 
             if (!rules.IsValid)
             {
-                throw new SystemException("Plugin is not configured correctly");
+                throw new InvalidPluginExecutionException("Plugin is not configured correctly");
             }
         }
 
@@ -46,7 +46,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
             var helper = new ContactPostOperationPluginHelper(localPluginContext.InitiatingUserService, tracer);
             try
             {
-                if (helper.CalculateContactCountTriggered(preImage))
+                if (helper.AreContactCountFieldsDirty(preImage))
                 {
                     var parentCustomerId = helper.GetParentCustomerId(preImage);
                     helper.UpdateChildContactCountOnAccount(new Guid[] { parentCustomerId });

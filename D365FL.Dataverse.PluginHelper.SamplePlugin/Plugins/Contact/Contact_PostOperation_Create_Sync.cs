@@ -24,7 +24,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 
             if (!rules.IsValid)
             {
-                throw new SystemException("Plugin is not configured correctly");
+                throw new InvalidPluginExecutionException("Plugin is not configured correctly");
             }
         }
 
@@ -44,7 +44,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
             var helper = new ContactPostOperationPluginHelper(localPluginContext.InitiatingUserService, tracer);
             try
             {
-                if (helper.CalculateContactCountTriggered(target))
+                if (helper.AreContactCountFieldsDirty(target))
                 {
                     var parentCustomerId = helper.GetParentCustomerId(target);
                     helper.UpdateChildContactCountOnAccount(new Guid[] { parentCustomerId });

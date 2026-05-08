@@ -34,24 +34,22 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
             return parentCustomer.Id;
         }
 
-        internal bool CalculateContactCountTriggered(Entity entity)
+        internal bool AreContactCountFieldsDirty(Entity entity)
         {
-            // Check fields impacting account name have changed before recalculating the name.
-            var requiredFields = new[] { "parentcustomerid" };
+            var countTriggerFields = new[] { "parentcustomerid" };
 
-            var triggered = requiredFields.All(rf => entity.Contains(rf)); // if all required fields are in the pre image
+            var triggered = countTriggerFields.All(f => entity.Contains(f)); // if all required fields are in the entity
 
             _tracer?.Trace($"CalculateContactCountTriggered : {triggered}");
 
             return triggered;
         }
 
-        internal bool CalculateContactCountTriggered(Entity target, Entity preImage)
+        internal bool AreContactCountFieldsDirty(Entity target, Entity preImage)
         {
-            // Check fields impacting account name have changed before recalculating the name.
-            var requiredFields = new[] { "parentcustomerid" };
+            var countTriggerFields = new[] { "parentcustomerid" };
 
-            var triggered = preImage.HaveAnyFieldsChanged(target, requiredFields, _tracer);
+            var triggered = preImage.HaveAnyFieldsChanged(target, countTriggerFields, _tracer);
 
             _tracer?.Trace($"CalculateContactCountTriggered : {triggered}");
             return triggered;
