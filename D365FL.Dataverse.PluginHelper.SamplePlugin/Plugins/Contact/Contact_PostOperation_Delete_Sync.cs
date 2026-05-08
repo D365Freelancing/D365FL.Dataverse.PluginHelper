@@ -5,21 +5,23 @@ using Microsoft.Xrm.Sdk;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 {
-    public class Contact_PostOperation_Create_Sync : PluginBase
+    public class Contact_PostOperation_Delete_Sync : PluginBase
     {
-        public Contact_PostOperation_Create_Sync(string unsecureConfiguration, string secureConfiguration)
+        public Contact_PostOperation_Delete_Sync(string unsecureConfiguration, string secureConfiguration)
           : base(typeof(Contact_PostOperation_Create_Sync))
         {
+
         }
         private void ValidateConfig(IPluginExecutionContext context, ITracingService tracingService)
         {
             var rules = new RuleFactory(context, tracingService);
             rules.AddIsPostOperationRule()
                 .AddIsSynchronousRule()
-                .AddHasTargetEntityRule()
-                .AddTargetEntityLogicalNameRule("contact")
-                .AddIsCreateMessageRule()
+                .AddHasTargetEntityReferenceRule()
+                .AddTargetEntityReferenceLogicalNameRule("contact")
+                .AddIsDeleteMessageRule()
                 .AddDoesNotExceedMaxDepthRule(3)
+                .AddHasPreImageRule()
                 .TraceRules();
 
             if (!rules.IsValid)
@@ -40,13 +42,13 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 
             ValidateConfig(context, tracer);
 
-            var target = context.GetTargetEntity(tracer);
+            var preImage = context.GetPreImage(tracer);
             var helper = new ContactPostOperationPluginHelper(localPluginContext.InitiatingUserService, tracer);
             try
             {
-                if (helper.CalculateContactCountTriggered(target))
+                if (helper.CalculateContactCountTriggered(preImage))
                 {
-                    var parentCustomerId = helper.GetParentCustomerId(target);
+                    var parentCustomerId = helper.GetParentCustomerId(preImage);
                     helper.UpdateChildContactCountOnAccount(new Guid[] { parentCustomerId });
                 }
             }

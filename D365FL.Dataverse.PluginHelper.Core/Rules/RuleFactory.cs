@@ -73,6 +73,19 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
             return this;
         }
 
+        public RuleFactory AddTargetEntityReferenceLogicalNameRule(string expectedName)
+        {
+
+            var ruleName = $"HasTargetEntityReferenceLogicalName_{expectedName}";
+
+            var isValid = false;
+            if (_context.HasTargetEntityReference())
+                isValid = _context.GetTargetEntityReference().LogicalName == expectedName;
+
+            _rules.Add(ruleName, isValid);
+
+            return this;
+        }
         #endregion
 
         #region "Mode Rules"

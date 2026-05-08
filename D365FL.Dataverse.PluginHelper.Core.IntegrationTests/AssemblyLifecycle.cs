@@ -37,9 +37,21 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests
             return id;
         }
 
+        public static Guid Create(Entity entity)
+        {
+            var id = OrgService.Create(entity);
+
+            return id;
+        }
+
         public static void UpdateEntity(Entity entity)
         {
             OrgService.Update(entity);
+        }
+
+        public static void DeleteEntity(Entity entity)
+        {
+            OrgService.Delete(entity.LogicalName, entity.Id);
         }
         public static Guid CreateAndTrackEntity(CreateRequest request)
         {

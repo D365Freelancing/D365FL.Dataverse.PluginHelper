@@ -1,9 +1,7 @@
 ﻿using System;
-using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
-using D365FL.Dataverse.PluginHelper.Core.TracingServiceExtension;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Queries;
+using D365FL.Dataverse.PluginHelper.SamplePlugin.Logic.Account.Commands;
 using Microsoft.Xrm.Sdk;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
@@ -41,31 +39,24 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
             }
 
             var context = localPluginContext.PluginExecutionContext;
-
             var tracer = localPluginContext.TracingService;
 
             ValidateConfig(context, tracer);
+
+            var helper = new ContactPostOperationPluginHelper(localPluginContext.InitiatingUserService, tracer);
 
             var target = context.GetTargetEntity(tracer);
             var preImage = context.GetPreImage(tracer);
             try
             {
 
-                if (CalculateContactCountTriggered(target, preImage, tracer))
+                if (helper.CalculateContactCountTriggered(target, preImage))
                 {
-                    var counter = new ContactCounterForAccountQuery(localPluginContext.InitiatingUserService);
+                    var counter = new SetChildContactCountCommand(localPluginContext.InitiatingUserService, tracer);
 
-                    // save new count on the old account
-                    var parentCustomerId = GetParentCustomerId(target, tracer);
-                    var newAccountToUpdate = new Entity("account", parentCustomerId);
-                    newAccountToUpdate["d365fl_contactcount"] = counter.GetContactCountFor(parentCustomerId);
-                    localPluginContext.InitiatingUserService.Update(newAccountToUpdate);
-
-                    // save new count on the original account
-                    var preImageparentCustomerId = GetParentCustomerId(preImage);
-                    var originalAccountToUpdate = new Entity("account", preImageparentCustomerId);
-                    originalAccountToUpdate["d365fl_contactcount"] = counter.GetContactCountFor(preImageparentCustomerId);
-                    localPluginContext.InitiatingUserService.Update(originalAccountToUpdate);
+                    var newParentCustomerId = helper.GetParentCustomerId(target); // new account id
+                    var oldParentCustomerId = helper.GetParentCustomerId(preImage); // old account id
+                    helper.UpdateChildContactCountOnAccount(new Guid[] { oldParentCustomerId, newParentCustomerId }); // update child contact count on the old and new account
                 }
             }
             catch (InvalidPluginExecutionException ex)
@@ -80,36 +71,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
                 tracer.Trace("Plugin Error: {0}", ex.ToString());
                 throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
-        }
-
-        private Guid GetParentCustomerId(Entity target, ITracingService tracer = null)
-        {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-
-            var parentCustomer = target.GetAttributeValue<EntityReference>("parentcustomerid");
-
-            tracer?.TraceEntityReference(parentCustomer, "EntRef-parentcustomerid");
-
-            // If parent customer was not set
-            if (parentCustomer == null)
-                return Guid.Empty;
-            // If parent customer is for a Contact (and not an Account)
-            if (!parentCustomer.LogicalName.Equals("account", StringComparison.OrdinalIgnoreCase))
-                return Guid.Empty;
-
-            return parentCustomer.Id;
-        }
-
-        private bool CalculateContactCountTriggered(Entity target, Entity preImage, ITracingService tracer = null)
-        {
-            // Check fields impacting account name have changed before recalculating the name.
-            var requiredFields = new[] { "parentcustomerid" };
-
-            var triggered = preImage.HaveAnyFieldsChanged(target, requiredFields, tracer);
-
-            tracer?.Trace($"CalculateContactCountTriggered : {triggered}");
-
-            return triggered;
         }
     }
 }
