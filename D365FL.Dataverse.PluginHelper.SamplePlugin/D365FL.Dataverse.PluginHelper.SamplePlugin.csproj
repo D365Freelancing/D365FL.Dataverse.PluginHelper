@@ -34,7 +34,6 @@
 
   <ItemGroup>
     <Folder Include="Account\" />
-    <Folder Include="ILocalPluginContextExtensions\" />
     <Folder Include="Logic\Contacts\Queries\" />
   </ItemGroup>
 
