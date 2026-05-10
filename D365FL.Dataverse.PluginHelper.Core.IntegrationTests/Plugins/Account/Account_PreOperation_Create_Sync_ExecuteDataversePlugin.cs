@@ -8,20 +8,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
     [TestClass]
     public class Account_PreOperation_Create_Sync_ExecuteDataversePlugin
     {
-        private const string accountEntityLogicalName = "account";
 
-        private Entity CreateAccount(string telephone1, string tickerSymbol)
-        {
-            var account = new Entity(accountEntityLogicalName);
-            account["telephone1"] = telephone1;
-            account["tickersymbol"] = tickerSymbol;
-            return account;
-        }
-
-        private string CreateName(string telephone1, string tickerSymbol)
-        {
-            return $"{tickerSymbol} - {telephone1}";
-        }
 
         #region "Set Name Tests"
 
@@ -31,8 +18,8 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             var telephone1 = "999 9999";
             var tickerSymbol = "QQQ";
-            var expectedName = CreateName(telephone1, tickerSymbol);
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var expectedName = AccountTestHelpers.CreateName(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
 
             // ACT
             var id = AssemblyLifecycle.CreateAndTrackEntity(account);
@@ -54,7 +41,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             var telephone1 = "999 9999";
             string tickerSymbol = null;
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: tickersymbol";
@@ -67,7 +54,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             var telephone1 = "999 9999";
             string tickerSymbol = string.Empty;
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: tickersymbol";
@@ -80,7 +67,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             var telephone1 = "999 9999";
 
-            var account = new Entity(accountEntityLogicalName);
+            var account = new Entity(AccountTestHelpers.accountEntityLogicalName);
             account["telephone1"] = telephone1;
 
             // ACT & ASSERT
@@ -97,7 +84,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             string telephone1 = null;
             var tickerSymbol = "QQQ";
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: telephone1";
@@ -110,7 +97,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             string telephone1 = string.Empty;
             var tickerSymbol = "QQQ";
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: telephone1";
@@ -123,7 +110,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             var tickerSymbol = "QQQ";
 
-            var account = new Entity(accountEntityLogicalName);
+            var account = new Entity(AccountTestHelpers.accountEntityLogicalName);
             account["tickersymbol"] = tickerSymbol;
 
             // ACT & ASSERT
@@ -141,7 +128,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             string telephone1 = null;
             string tickerSymbol = null;
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var ex = PluginErrorAsserts.AssertPluginError(() => AssemblyLifecycle.OrgService.Create(account));
@@ -153,7 +140,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Create_Sync_ReturnsValidationError_WhenAllFieldsAreMissing()
         {
             // ARRANGE
-            var account = new Entity(accountEntityLogicalName);
+            var account = new Entity(AccountTestHelpers.accountEntityLogicalName);
 
             // ACT & ASSERT
             var ex = PluginErrorAsserts.AssertPluginError(() => AssemblyLifecycle.OrgService.Create(account));
@@ -167,7 +154,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             string telephone1 = string.Empty;
             string tickerSymbol = string.Empty;
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var ex = PluginErrorAsserts.AssertPluginError(() => AssemblyLifecycle.OrgService.Create(account));

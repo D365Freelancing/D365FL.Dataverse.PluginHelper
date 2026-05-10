@@ -10,51 +10,6 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
     [TestClass]
     public class Account_PreOperation_Update_Sync_ExecuteDataversePlugin
     {
-        private const string accountEntityLogicalName = "account";
-
-        private Entity CreateAccount(string telephone1 = "999 111", string tickerSymbol= "AA")
-        {
-            var account = new Entity(accountEntityLogicalName);
-            account["telephone1"] = telephone1;
-            account["tickersymbol"] = tickerSymbol;
-            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
-            account.Id = id;
-            return account;
-        }
-
-        private Entity CreateAccountInCorruptedState(
-            string telephone1 = null, 
-            string tickerSymbol = null)
-        {
-            var account = new Entity(accountEntityLogicalName);
-
-            if(telephone1 != null) account["telephone1"] = telephone1;
-            if (tickerSymbol != null) account["tickersymbol"] = tickerSymbol;
-            
-            var createRequest = new CreateRequest()
-            {
-                Target = account,
-            };
-            createRequest.Parameters.Add("BypassCustomPluginExecution", true);
-                        
-            var id = AssemblyLifecycle.CreateAndTrackEntity(createRequest);
-            account.Id = id;
-            return account;
-        }
-
-        private Entity UpdateAccount(Guid id, string telephone1, string tickerSymbol)
-        {
-            var account = new Entity(accountEntityLogicalName, id);
-            account["telephone1"] = telephone1;
-            account["tickersymbol"] = tickerSymbol;
-            
-            return account;
-        }
-
-        private string CreateName(string telephone1, string tickerSymbol)
-        {
-            return $"{tickerSymbol} - {telephone1}";
-        }
 
         #region "Set Name Tests"
 
@@ -62,18 +17,18 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Update_Sync_SetsNameCorrectly_WhenTickerSymbolAndPhoneSet()
         {
             // ARRANGE
-            var account = CreateAccount();
+            var account = AccountTestHelpers.CreateAccount();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
 
             // ACT
             var telephone1 = "999 9999";
             var tickerSymbol = "QQQ";
-            var id = account.Id;
             
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
             AssemblyLifecycle.OrgService.Update(updateEntity);
 
             // ASSERT
-            var expectedName = CreateName(telephone1, tickerSymbol);
+            var expectedName = AccountTestHelpers.CreateName(telephone1, tickerSymbol);
             var saveEntity = AssemblyLifecycle.OrgService.Retrieve("account", id, new ColumnSet("name"));
             var actualName = saveEntity.GetAttributeValue<string>("name");
             Assert.AreEqual(expectedName, actualName, "Name not set correctly");
@@ -87,17 +42,18 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // it anyway incase old data is in this state
 
             // ARRANGE
-            var account = CreateAccountInCorruptedState();
+            var request = AccountTestHelpers.CreateAccountInCorruptedState();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(request);
 
             // ACT
             var telephone1 = "999 9999";
             var tickerSymbol = "QQ";
-            var id = account.Id;
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
             AssemblyLifecycle.OrgService.Update(updateEntity);
 
             // ASSERT
-            var expectedName = CreateName(telephone1, tickerSymbol);
+            var expectedName = AccountTestHelpers.CreateName(telephone1, tickerSymbol);
             var saveEntity = AssemblyLifecycle.OrgService.Retrieve("account", id, new ColumnSet("name"));
             var actualName = saveEntity.GetAttributeValue<string>("name");
             Assert.AreEqual(expectedName, actualName, "Name not set correctly");
@@ -111,13 +67,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Update_Sync_ReturnsValidationError_WhenTickerSymbolIsEmpty()
         {
             // ARRANGE
-            var account = CreateAccount();
+            var account = AccountTestHelpers.CreateAccount();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
 
             var telephone1 = "999 9999";
             var tickerSymbol = "";
-            var id = account.Id;
 
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: tickersymbol";
@@ -128,12 +84,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Update_Sync_ReturnsValidationError_WhenTickerSymbolIsNull()
         {
             // ARRANGE
-            var account = CreateAccount();
+            var account = AccountTestHelpers.CreateAccount();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
+
             var telephone1 = "999 9999";
             string tickerSymbol = null;
-            var id = account.Id;
-
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: tickersymbol";
@@ -151,12 +108,12 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // set on create
 
             // ARRANGE
-            var account = CreateAccountInCorruptedState("999 9991");
+            var request = AccountTestHelpers.CreateAccountInCorruptedState("999 9991");
+            var id = AssemblyLifecycle.CreateAndTrackEntity(request);
 
             var telephone1 = "999 9999";
-            var id = account.Id;
 
-            var updateEntity = new Entity(accountEntityLogicalName, id);
+            var updateEntity = new Entity(AccountTestHelpers.accountEntityLogicalName, id);
             updateEntity["telephone1"] = telephone1;
 
             // ACT & ASSERT
@@ -172,13 +129,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Update_Sync_ReturnsValidationError_WhenTelephone1IsEmpty()
         {
             // ARRANGE
-            var account = CreateAccount();
+            var account = AccountTestHelpers.CreateAccount();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
 
             string telephone1 = "";
             var tickerSymbol = "QQQ";
-            var id = account.Id;
 
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: telephone1";
@@ -189,13 +146,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Update_Sync_ReturnsValidationError_WhenTelephone1IsNull()
         {
             // ARRANGE
-            var account = CreateAccount();
+            var account = AccountTestHelpers.CreateAccount();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
 
             string telephone1 = null;
             var tickerSymbol = "QQQ";
-            var id = account.Id;
 
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var expectedError = "Cannot save Account — the following required fields are missing or empty: telephone1";
@@ -213,12 +170,12 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // set on create
 
             // ARRANGE
-            var account = CreateAccountInCorruptedState(null, "AA");
+            var request = AccountTestHelpers.CreateAccountInCorruptedState(null, "AA");
+            var id = AssemblyLifecycle.CreateAndTrackEntity(request);
 
             var tickerSymbol = "TT";
-            var id = account.Id;
 
-            var updateEntity = new Entity(accountEntityLogicalName, id);
+            var updateEntity = new Entity(AccountTestHelpers.accountEntityLogicalName, id);
             updateEntity["tickersymbol"] = tickerSymbol;
 
             // ACT & ASSERT
@@ -234,13 +191,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Update_Sync_ReturnsValidationError_WhenTelephone1IsEmptyAndTickerSymbolIsNull()
         {
             // ARRANGE
-            var account = CreateAccount();
+            var account = AccountTestHelpers.CreateAccount();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
 
             var telephone1 = string.Empty;
             string tickerSymbol = null;
-            var id = account.Id;
-
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var ex = PluginErrorAsserts.AssertPluginError(() => AssemblyLifecycle.OrgService.Update(updateEntity));
@@ -252,13 +209,13 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
         public void Account_PreOperation_Update_Sync_ReturnsValidationError_WhenAllFieldsAreNull()
         {
             // ARRANGE
-            var account = CreateAccount();
+            var account = AccountTestHelpers.CreateAccount();
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
 
             string telephone1 = null;
             string tickerSymbol = null;
-            var id = account.Id;
 
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
 
             // ACT & ASSERT
             var ex = PluginErrorAsserts.AssertPluginError(() => AssemblyLifecycle.OrgService.Update(updateEntity));
@@ -275,15 +232,15 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Account
             // ARRANGE
             var telephone1 = "999 9999";
             var tickerSymbol = "QQ";
-            var account = CreateAccount(telephone1, tickerSymbol);
+            var account = AccountTestHelpers.CreateAccount(telephone1, tickerSymbol);
+            var id = AssemblyLifecycle.CreateAndTrackEntity(account);
 
             // ACT
-            var id = account.Id;
-            var updateEntity = UpdateAccount(id, telephone1, tickerSymbol);
+            var updateEntity = AccountTestHelpers.UpdateAccount(id, telephone1, tickerSymbol);
             AssemblyLifecycle.OrgService.Update(updateEntity);
 
             // ASSERT
-            var expectedName = CreateName(telephone1, tickerSymbol);
+            var expectedName = AccountTestHelpers.CreateName(telephone1, tickerSymbol);
             var saveEntity = AssemblyLifecycle.OrgService.Retrieve("account", id, new ColumnSet("name"));
             var actualName = saveEntity.GetAttributeValue<string>("name");
             Assert.AreEqual(expectedName, actualName, "Name not set correctly");
