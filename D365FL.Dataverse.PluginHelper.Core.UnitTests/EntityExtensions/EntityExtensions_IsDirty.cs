@@ -6,7 +6,7 @@ using System;
 namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
 {
     [TestClass]
-    public class EntityExtensions_HasFieldChanged
+    public class EntityExtensions_IsDirty
     {
         private Entity CreateTestEntity(string columnName, object columnValue)
         {
@@ -25,7 +25,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
             var modified = CreateTestEntity(columnName, modifiedValue);
 
             // ACT
-            var hasChanged = original.HasFieldChanged(modified, columnName);
+            var hasChanged = original.IsDirty(modified, columnName);
 
             return hasChanged;
         }
@@ -40,9 +40,9 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
             var modified = new Entity();
             modified.Attributes.Add(columnName, true);
 
-            var result = original.HasFieldChanged(modified, columnName);
+            var result = original.IsDirty(modified, columnName);
 
-            Assert.IsTrue(result, "HasFieldChanged DID NOT return true when column is absent from original but present in modified");
+            Assert.IsTrue(result, "IsDirty DID NOT return true when column is absent from original but present in modified");
         }
 
         [TestMethod]
@@ -53,9 +53,9 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
             var modified = new Entity();
             original.Attributes.Add(columnName, true);
 
-            var result = original.HasFieldChanged(modified, columnName);
+            var result = original.IsDirty(modified, columnName);
 
-            Assert.IsTrue(result, "HasFieldChanged DID NOT return true when column is absent from modified but present in original");
+            Assert.IsTrue(result, "IsDirty DID NOT return true when column is absent from modified but present in original");
 
             // TODO think about if this should be false or not
         }
@@ -262,7 +262,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
             var result = HasChanged(false, true);
 
             // ASSERT
-            Assert.IsTrue(result, "HasFieldChanged DID NOT return true when boolean field has changed");
+            Assert.IsTrue(result, "IsDirty DID NOT return true when boolean field has changed");
         }
 
         [TestMethod]
@@ -271,7 +271,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.UnitTests.EntityExtensions
             var result = HasChanged(true, true);
 
             // ASSERT
-            Assert.IsFalse(result, "HasFieldChanged DID NOT return false when both boolean values are the same");
+            Assert.IsFalse(result, "IsDirty DID NOT return false when both boolean values are the same");
         }
 
         #endregion

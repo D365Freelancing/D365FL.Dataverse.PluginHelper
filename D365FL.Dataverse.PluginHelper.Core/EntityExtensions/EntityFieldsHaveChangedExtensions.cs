@@ -7,12 +7,12 @@ namespace D365FL.Dataverse.PluginHelper.Core.EntityExtensions
 {
     public static class EntityFieldsHaveChangedExtensions
     {
-        public static bool HasFieldChanged(
+        public static bool IsDirty(
             this Entity originalEntity,
             Entity modifiedEntity,
             string fieldName,
             ITracingService tracer = null,
-            string tracingLabel = "HasFieldChanged")
+            string tracingLabel = "IsDirty")
         {
             if (originalEntity == null) throw new ArgumentNullException(nameof(originalEntity));
             if (modifiedEntity == null) throw new ArgumentNullException(nameof(modifiedEntity));
@@ -21,41 +21,41 @@ namespace D365FL.Dataverse.PluginHelper.Core.EntityExtensions
             var originalValue = originalEntity.Contains(fieldName) ? originalEntity[fieldName] : null;
             var modifiedValue = modifiedEntity.Contains(fieldName) ? modifiedEntity[fieldName] : null;
 
-            var changed = !Equals(originalValue, modifiedValue);
+            var isDirty = !Equals(originalValue, modifiedValue);
 
             tracer?.TraceWithKey(tracingLabel, $" [{fieldName}] HasFieldChanged");
             tracer?.TraceWithKey(tracingLabel, $"   originalValue: {originalValue}");
             tracer?.TraceWithKey(tracingLabel, $"   modifiedValue: {modifiedValue}");
-            tracer?.TraceWithKey(tracingLabel, $"   changed: {changed}");
+            tracer?.TraceWithKey(tracingLabel, $"   isDirty: {isDirty}");
 
-            return changed;
+            return isDirty;
         }
 
-        public static bool HaveAnyFieldsChanged(
+        public static bool IsDirty(
             this Entity originalEntity,
             Entity modifiedEntity,
             string[] fieldNames,
             ITracingService tracer = null,
-            string tracingLabel = "HaveAnyFieldsChanged")
+            string tracingLabel = "IsDirty")
         {
             if (originalEntity == null) throw new ArgumentNullException(nameof(originalEntity));
             if (modifiedEntity == null) throw new ArgumentNullException(nameof(modifiedEntity));
             if (fieldNames == null) throw new ArgumentNullException(nameof(fieldNames));
             if (fieldNames.Length == 0) throw new ArgumentException("fieldNames cannot be empty.", nameof(fieldNames));
 
-            var anyFieldsHaveChanged = fieldNames
-                .Any(fieldName => originalEntity.HasFieldChanged(modifiedEntity, fieldName, tracer, tracingLabel));
+            var isDirty = fieldNames
+                .Any(fieldName => originalEntity.IsDirty(modifiedEntity, fieldName, tracer, tracingLabel));
 
-            tracer?.TraceWithKey(tracingLabel,$"   anyFieldsChanged: {anyFieldsHaveChanged}");
+            tracer?.TraceWithKey(tracingLabel,$"   IsDirty: {isDirty}");
 
-            return anyFieldsHaveChanged;
+            return isDirty;
         }
 
-        public static Entity GetChangedFields(
+        public static Entity GetDirtyFields(
             this Entity originalEntity,
             Entity modifiedEntity,
             ITracingService tracer = null,
-            string tracingLabel = "GetChangedFields")
+            string tracingLabel = "GetDirtyFields")
         {
             if (originalEntity == null) throw new ArgumentNullException(nameof(originalEntity));
             if (modifiedEntity == null) throw new ArgumentNullException(nameof(modifiedEntity));
@@ -64,7 +64,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.EntityExtensions
 
             foreach (var field in modifiedEntity.Attributes)
             {
-                if (originalEntity.HasFieldChanged(modifiedEntity, field.Key, tracer, tracingLabel))
+                if (originalEntity.IsDirty(modifiedEntity, field.Key, tracer, tracingLabel))
                 {
                     changedEntity[field.Key] = field.Value;
                 }

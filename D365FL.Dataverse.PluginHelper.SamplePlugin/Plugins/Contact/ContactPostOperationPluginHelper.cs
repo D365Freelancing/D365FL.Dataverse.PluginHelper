@@ -49,7 +49,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
         {
             var countTriggerFields = new[] { "parentcustomerid" };
 
-            var triggered = preImage.HaveAnyFieldsChanged(target, countTriggerFields, _tracer);
+            var triggered = preImage.IsDirty(target, countTriggerFields);
 
             _tracer?.Trace($"CalculateContactCountTriggered : {triggered}");
             return triggered;

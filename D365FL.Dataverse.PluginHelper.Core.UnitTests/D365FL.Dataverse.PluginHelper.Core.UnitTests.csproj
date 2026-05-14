@@ -100,8 +100,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\TestTracingService.cs" />
-    <Compile Include="EntityExtensions\EntityExtensions_GetChangedFields.cs" />
-    <Compile Include="EntityExtensions\EntityExtensions_HasFieldChanged.cs" />
+    <Compile Include="EntityExtensions\EntityExtensions_GetDirtyFields.cs" />
+    <Compile Include="EntityExtensions\EntityExtensions_IsDirty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TracingServiceExtensions\TracingService_TraceEntity.cs" />
   </ItemGroup>

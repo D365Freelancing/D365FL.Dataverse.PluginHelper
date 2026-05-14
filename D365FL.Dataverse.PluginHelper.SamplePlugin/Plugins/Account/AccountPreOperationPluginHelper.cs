@@ -34,7 +34,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
 
         internal Entity CopyChangedFieldsToTarget(Entity target, Entity accountToUpdate)
         {
-            var deltas = target.GetChangedFields(accountToUpdate);
+            var deltas = target.GetDirtyFields(accountToUpdate);
             deltas.CopyAttributeValues(target, _tracer);
             return deltas;
         }
@@ -42,9 +42,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
         internal bool AreNameFieldsDirty(Entity target, Entity preImage)
         {
             // Check fields impacting account name have changed before recalculating the name.
-            var nameSourceFields = new[] { "tickersymbol", "telephone1" };
-
-            var triggered = preImage.HaveAnyFieldsChanged(target, nameSourceFields);
+            var triggered = preImage.IsDirty(target, new[] { "tickersymbol", "telephone1" });
 
             return triggered;
         }
