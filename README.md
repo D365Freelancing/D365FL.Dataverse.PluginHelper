@@ -1,5 +1,5 @@
 # D365FL.Dataverse.PluginHelper
-Test Commit Rule
+
 > A powerful C# framework for building clean, maintainable, and high-performance Microsoft Dataverse plugins with best practices built-in. Includes comprehensive samples and demonstrations of plugin unit testing and integration testing.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
