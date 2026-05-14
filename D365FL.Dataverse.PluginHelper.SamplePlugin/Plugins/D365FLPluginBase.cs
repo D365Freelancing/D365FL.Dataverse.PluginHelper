@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xrm.Sdk;
 using System;
 
-namespace D365FL.Dataverse.PluginHelper.SamplePlugin
+namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
 {
     // TODO determine how to get this into a reusable library
     public abstract class D365FLPluginBase : PluginBase
@@ -39,17 +39,15 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin
             catch (InvalidPluginExecutionException ex)
             {
                 // Log it, but re-throw as-is — the message is already user-friendly
-                this.Tracer.Trace("Validation/plugin error: {0}", ex.ToString());
+                Tracer.Trace("Validation/plugin error: {0}", ex.ToString());
                 throw;
             }
             catch (Exception ex)
             {
                 // Unexpected error — log and wrap with a safe user-facing message
-                this.Tracer.Trace("Plugin Error: {0}", ex.ToString());
+                Tracer.Trace("Plugin Error: {0}", ex.ToString());
                 throw new InvalidPluginExecutionException("An error occurred in the plug-in.", ex);
             }
         }
-
-
     }
 }

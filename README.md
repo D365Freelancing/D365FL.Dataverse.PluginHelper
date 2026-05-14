@@ -16,52 +16,15 @@ This repository includes:
 - ✅ **Unit Testing Samples** - Demonstrates how to unit test plugins in isolation
 - 🔗 **Integration Testing Samples** - Shows integration testing against Dataverse
 
-### Key Features
-
-- ✅ **Clean Code Architecture** - Separation of concerns and maintainable plugin structure
-- ✅ **Dirty Field Tracking** - Trigger logic only when required fields are modified
-- ✅ **Delta Updates** - Save only modified fields back to Dataverse to prevent cascading plugin executions
-- ✅ **Prevent Max Depth Issues** - Intelligent change detection reduces plugin recursion
-- ✅ **Best Practices Enforcement** - Built-in patterns for secure, efficient plugin development
-- ✅ **Fast Development** - Boilerplate reduction and reusable components accelerate plugin creation
-- ✅ **Easy to Read** - Intuitive API design for improved code clarity and maintainability
-- ✅ **Testable Design** - Framework patterns support both unit testing and integration testing
-- ✅ **Plugin Testing Guidance** - Examples of plugin unit tests and integration tests included
-
 ## Why D365FL.Dataverse.PluginHelper?
 
-### The Problem
-
-Microsoft Dataverse plugins are powerful but can quickly become complex and problematic:
-
-- **Plugin Depth Exceeded Errors** - Recursive plugin executions trigger max depth limits (16 levels)
-- **Unnecessary Data Operations** - Saving all fields causes downstream plugins to fire repeatedly
-- **Messy Code** - Plugin business logic becomes tangled without proper structure
-- **Performance Issues** - Inefficient field handling and redundant operations slow down processes
-- **Maintenance Burden** - Hard-to-read code increases bugs and development time
-- **Testing Difficulty** - Plugins are hard to test without a proper framework structure
-
-### The Solution
-
-D365FL.Dataverse.PluginHelper provides a structured framework that addresses these challenges:
-
-```csharp
-// Only trigger when specific fields change
-if (entity.IsDirty("fieldname"))
-{
-    // Your business logic here
-}
-
-// Only save modified fields back to Dataverse
-entity.UpdateDelta(service);
-```
-
-This approach:
-- Prevents unnecessary plugin executions
-- Reduces plugin depth issues automatically
-- Keeps code clean and readable
-- Improves overall system performance
-- Enables easy testing and validation
+- ✅ **Clean Code Architecture** - Encourages separation of concerns, making plugins **easier to read, maintain, and test**.
+- ✅ **Dirty Field Tracking** - Provides granular control to trigger business logic only when required fields are modified, ensuring expensive operations are not executed unnecessarily.
+- ✅ **Delta Updates** - Ensures modified fields are saved back to Dataverse preventing accidental cascade firing of additional plugins.
+- ✅ **Prevent Max Depth Issues** - **Dirty Field Tracking** and **Delta Updates** prevent Max Depth Issues — *a cascading chain reaction where plugins trigger other plugins* - creating expensive and time-consuming problems that are difficult to debug.
+- ✅ **Best Practice Exception Management** - Built-in exception handling and logging ensure plugins do not fail silently, providing visibility for faster debugging and preventing costly production issues.
+- ✅ **Unit Testing Examples** - Extensive FakeXrmEasy samples demonstrating plugin unit testing with rapid feedback loops, ensuring defects are caught before deployment and reducing development cycles.
+- ✅ **Integration Testing Examples** - Integration test samples demonstrating end-to-end plugin validation in live Dataverse environments, ensuring defects are caught before production and providing developer confidence in plugin reliability
 
 ## Project Structure
 
@@ -101,15 +64,11 @@ D365FL.Dataverse.PluginHelper/
 
 ### NuGet Package
 
-```bash
-dotnet add package D365FL.Dataverse.PluginHelper
-```
+    - Comming Soon. Watch this space!
 
 Or via Package Manager:
 
-```
-Install-Package D365FL.Dataverse.PluginHelper
-```
+    - Comming Soon. Watch this space!
 
 ### Clone the Repository (for samples and learning)
 
@@ -123,32 +82,59 @@ cd D365FL.Dataverse.PluginHelper
 ### Basic Plugin Setup
 
 ```csharp
-using D365FL.Dataverse.PluginHelper;
+using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
+using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
+using D365FL.Dataverse.PluginHelper.Core.Rules;
 
-public class MyDataversePlugin : IPlugin
+namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
 {
-    public void Execute(IServiceProvider serviceProvider)
+    public class MyDataversePlugin : D365FLPluginBase
     {
-        var context = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-        var service = serviceProvider.GetService(typeof(IOrganizationService)) as IOrganizationService;
-        
-        // Get the target entity from the context
-        var entity = context.InputParameters["Target"] as Entity;
-        
-        // Check if specific field is dirty (modified)
-        if (entity.IsDirty("new_fieldname"))
+        public MyDataversePlugin() : base(typeof(MyDataversePlugin))
         {
-            // Execute logic only when field changes
-            ProcessFieldChange(entity, service);
         }
-        
-        // Update only modified fields back to Dataverse
-        entity.UpdateDelta(service);
-    }
-    
-    private void ProcessFieldChange(Entity entity, IOrganizationService service)
-    {
-        // Your business logic here
+
+        protected override bool ValidateConfig()
+        {
+            var rules = new RuleFactory(Context, Tracer);
+            rules.AddIsPreOperationRule()
+                .AddIsSynchronousRule()
+                .AddHasTargetEntityRule()
+                .AddTargetEntityLogicalNameRule("myentity")
+                .AddIsUpdateMessageRule()
+                .AddDoesNotExceedMaxDepthRule(3)
+                .AddHasPreImageRule();
+
+            return rules.IsValid;
+        }
+
+        protected override void Execute()
+        {
+            var target = base.Context.GetTargetEntity();
+            var preImage = Context.GetPreImage(Tracer);
+
+            // Merge preImage and target entity to ensure logic does not fail because of missing field values
+            // its not used in this sample, but is included for demonstration purposes.
+            var fullEntity = preImage.Merge(target, base.Tracer);
+
+            // if required fields are dirty
+            if (preImage.IsDirty(fullEntity, new[] { "field1", "field2", "field3" }))
+            {
+                base.Tracer.Trace("execute custom logic");
+                // Then execute business logic
+                // ... and perform operation on the target entity
+
+                target["field1"] = "updated value";
+                target["field2"] = "updated value";
+                target["field3"] = "updated value";
+
+                // Get changed fields as an entity
+                var deltas = target.GetDirtyFields(fullEntity);
+                
+                // Save Changes
+                InitiatingUserService.Update(deltas);
+            }
+        }
     }
 }
 ```
@@ -159,13 +145,13 @@ Track which fields have been modified without manual comparison:
 
 ```csharp
 // Check if a single field is dirty
-if (entity.IsDirty("new_fieldname"))
+if (preImage.IsDirty(target, "field1"))
 {
     // Field was modified - execute logic
 }
 
 // Check if any field in a list is dirty
-if (entity.IsDirty(new[] { "field1", "field2", "field3" }))
+if (preImage.IsDirty(target, new[] { "field1", "field2", "field3" }))
 {
     // One or more fields were modified
 }
@@ -180,191 +166,31 @@ Save only modified fields to prevent cascading plugin executions:
 
 ```csharp
 // Modify entity
-entity["new_fieldname"] = "new value";
+entity["field1"] = "new value";
 
 // Update only the modified fields back to Dataverse
-entity.UpdateDelta(service);
+// This prevents downstream plugins from being triggered by saving unchanged fields
 
-// This prevents downstream plugins from being triggered by unchanged fields
+var deltas = entity.GetDirtyFields(fullEntity);
+orgService.Update(delta);
+
 ```
 
 ## Testing Plugins
 
 ### Unit Testing Example
 
-The framework is designed for easy unit testing. Here's a sample unit test:
-
-```csharp
-[TestClass]
-public class AccountPluginTests
-{
-    [TestMethod]
-    public void WhenAccountNameChanges_ShouldUpdateDescription()
-    {
-        // Arrange
-        var account = new Entity("account", Guid.NewGuid());
-        account["name"] = "Original Name";
-        
-        var updatedAccount = new Entity("account", account.Id);
-        updatedAccount["name"] = "Updated Name";
-        
-        var mockService = new Mock<IOrganizationService>();
-        
-        // Act
-        var plugin = new AccountPlugin();
-        var isDirty = updatedAccount.IsDirty("name");
-        
-        // Assert
-        Assert.IsTrue(isDirty);
-    }
-    
-    [TestMethod]
-    public void WhenNonCriticalFieldChanges_ShouldNotExecuteLogic()
-    {
-        // Arrange
-        var account = new Entity("account");
-        account["name"] = "Test Account";
-        account["description"] = "Old Description";
-        
-        var updatedAccount = new Entity("account");
-        updatedAccount["name"] = "Test Account";
-        updatedAccount["description"] = "New Description";
-        
-        // Act
-        var nameIsDirty = updatedAccount.IsDirty("name");
-        
-        // Assert
-        Assert.IsFalse(nameIsDirty); // Only description changed, name is clean
-    }
-}
-```
+    - Comming soon. Watch this space!
 
 ### Integration Testing Example
 
-Test your plugins against a real or test Dataverse environment:
-
-```csharp
-[TestClass]
-public class AccountPluginIntegrationTests
-{
-    private IOrganizationService _service;
-    
-    [TestInitialize]
-    public void Setup()
-    {
-        // Connect to your test Dataverse environment
-        _service = new CrmServiceClient("Url=https://yourorg.crm.dynamics.com/; AuthType=OAuth; ...");
-    }
-    
-    [TestMethod]
-    public void WhenCreatingAccount_ShouldExecutePlugin()
-    {
-        // Arrange
-        var account = new Entity("account");
-        account["name"] = "Integration Test Account";
-        account["new_customfield"] = "Test Value";
-        
-        // Act
-        var accountId = _service.Create(account);
-        var createdAccount = _service.Retrieve("account", accountId, new ColumnSet(true));
-        
-        // Assert
-        Assert.IsNotNull(createdAccount);
-        Assert.AreEqual("Integration Test Account", createdAccount["name"]);
-    }
-}
-```
-
-## Best Practices
-
-This framework encourages and enables these Dataverse plugin best practices:
-
-### 1. Conditional Logic Based on Field Changes
-
-Always check if a field is dirty before executing related logic:
-
-```csharp
-if (entity.IsDirty("statuscode"))
-{
-    UpdateRelatedRecords(entity, service);
-}
-```
-
-### 2. Minimize Plugin Depth
-
-Reduce cascading plugin executions by updating only necessary fields:
-
-```csharp
-// Instead of updating the entire entity
-entity.Attributes.Clear(); // Avoid this!
-
-// Update only what changed
-entity.UpdateDelta(service);
-```
-
-### 3. Separate Concerns
-
-Use a layered architecture for complex business logic:
-
-```csharp
-public class MyPlugin : IPlugin
-{
-    public void Execute(IServiceProvider serviceProvider)
-    {
-        var handler = new PluginHandler(serviceProvider);
-        handler.Execute();
-    }
-}
-
-public class PluginHandler
-{
-    private IPluginExecutionContext _context;
-    private IOrganizationService _service;
-    
-    // Separate business logic here
-}
-```
-
-### 4. Efficient Data Retrieval
-
-Only query and modify the fields you need:
-
-```csharp
-// Retrieve only necessary columns
-var query = new QueryExpression("account")
-{
-    ColumnSet = new ColumnSet("name", "new_customfield")
-};
-
-var results = service.RetrieveMultiple(query);
-```
-
-### 5. Make Plugins Testable
-
-Design plugins with dependency injection for testability:
-
-```csharp
-public class MyPlugin : IPlugin
-{
-    private readonly IPluginHandler _handler;
-    
-    public MyPlugin() : this(new PluginHandler()) { }
-    
-    public MyPlugin(IPluginHandler handler)
-    {
-        _handler = handler;
-    }
-    
-    public void Execute(IServiceProvider serviceProvider)
-    {
-        _handler.Execute(serviceProvider);
-    }
-}
-```
+    - Comming soon. Watch this space!
 
 ## Documentation
 
 For detailed documentation and advanced usage scenarios, see:
+
+    - NOTE Below documentation and more will be created soon. Watch this space!
 
 - [API Reference](docs/API.md) - Complete framework API documentation
 - [Best Practices Guide](docs/BEST_PRACTICES.md) - Dataverse plugin development best practices
@@ -376,14 +202,58 @@ For detailed documentation and advanced usage scenarios, see:
 
 ## System Requirements
 
-- **.NET Framework**: 4.6.2 or higher (for on-premises) / .NET 6.0+ (for cloud)
+- **.NET Framework**: 4.6.2 or higher (for on-premises)
 - **Dataverse**: All versions (Power Apps, Dynamics 365, and on-premises)
 - **CRM SDK**: 9.0 or higher
 - **Testing**: xUnit, NUnit, or MSTest (samples use MSTest)
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+Contributions are welcome! To maintain code quality and consistency:
+
+- Submit a Pull Request with a clear description of changes
+- Include unit tests for all new functionality
+- Ensure your code follows C# best practices and conventions
+- Verify all tests pass (unit and integration)
+
+**Before starting major work**, please open an [Issue](../../issues) to discuss your idea. This passion project is maintained with high standards for code quality, and we want to ensure your contribution aligns with the framework's direction.
+
+## Requesting a Feature
+
+Have an idea to improve D365FL.Dataverse.PluginHelper? We'd love to hear it!
+
+### Before You Submit
+
+1. **Check existing issues** - Search [GitHub Issues](../../issues) to see if your feature has already been requested
+2. **Consider the scope** - Does this feature align with the framework's goal of making Dataverse plugins cleaner and more maintainable?
+3. **Think about use cases** - How would this feature help developers? What problems does it solve?
+
+### Submitting a Feature Request
+
+Please open a [GitHub Issue](../../issues) with the following information:
+
+- **Title** - Clear, concise description of the feature
+- **Problem Statement** - What problem does this solve? Include real-world examples
+- **Proposed Solution** - How should this feature work? Include code examples if possible
+- **Alternatives Considered** - Are there other ways to solve this problem?
+- **Additional Context** - Any other relevant information (links, screenshots, etc.)
+
+### Example Feature Request
+
+**Title:** Add retry logic helper for transient Dataverse errors
+
+**Problem:** When plugins make external API calls, transient network errors can cause plugin failures. Currently, developers must implement retry logic manually.
+
+**Proposed Solution:** Add a `RetryHelper` class that handles exponential backoff and transient error detection.
+
+**Example Code:**
+```csharp
+var result = RetryHelper.Execute(
+    action: () => externalService.CallApi(),
+    maxAttempts: 3,
+    delayMs: 1000
+);
+```
 
 ## License
 
@@ -395,17 +265,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 📚 **Samples**: Browse sample plugins and tests in the `samples/` directory
 - 🐛 **Issues**: Report bugs via [GitHub Issues](../../issues)
 - 💬 **Discussions**: Ask questions in [GitHub Discussions](../../discussions)
-- 📧 **Email**: Contact the maintainer for support
+- 📧 **Email**: Contact the maintainer for support [consulting@d365freelancing.com](consulting@d365freelancing.com)
 
-## Roadmap
-
-- [ ] Support for table-driven configuration
-- [ ] Performance analytics integration
-- [ ] Enhanced debugging tools
-- [ ] Plugin template generation
-- [ ] Async plugin support documentation
-- [ ] FakeXrmEasy integration samples
-- [ ] Mocking library recommendations and examples
 
 ## Related Resources
 

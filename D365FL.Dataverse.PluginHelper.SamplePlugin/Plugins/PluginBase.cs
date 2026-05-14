@@ -5,7 +5,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.ServiceModel;
 
-namespace D365FL.Dataverse.PluginHelper.SamplePlugin
+namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
 {
     /// <summary>
     /// Base class for all plug-in classes.
