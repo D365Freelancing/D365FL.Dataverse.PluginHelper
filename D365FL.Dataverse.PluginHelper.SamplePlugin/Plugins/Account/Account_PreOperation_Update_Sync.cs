@@ -23,7 +23,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                     secureConfiguration,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
-        protected override bool ValidateConfig()
+        protected override string[] ValidateConfig()
         {
             var rules = new RuleFactory(base.Context, base.Tracer);
             rules.AddIsPreOperationRule()
@@ -35,7 +35,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 .AddHasPreImageRule()
                 .TraceRules();
 
-            return rules.IsValid;
+            return rules.Errors;
         }
 
         protected override void Execute()

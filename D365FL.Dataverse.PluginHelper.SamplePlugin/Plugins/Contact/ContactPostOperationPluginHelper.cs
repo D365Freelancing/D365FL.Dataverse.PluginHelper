@@ -34,6 +34,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
             return parentCustomer.Id;
         }
 
+        // check if fields are dirty for a CREATE plugin
         internal bool AreContactCountFieldsDirty(Entity entity)
         {
             var countTriggerFields = new[] { "parentcustomerid" };
@@ -45,6 +46,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
             return triggered;
         }
 
+        // check if fields are dirty for a UPDATE plugin
         internal bool AreContactCountFieldsDirty(Entity target, Entity preImage)
         {
             var countTriggerFields = new[] { "parentcustomerid" };

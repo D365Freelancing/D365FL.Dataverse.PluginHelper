@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xrm.Sdk;
 using System;
+using System.Linq;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
 {
@@ -14,7 +15,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
         public IPluginExecutionContext Context { get; private set; }
         public ITracingService Tracer { get; private set; }
         public IOrganizationService InitiatingUserService { get; private set; }
-        protected abstract bool ValidateConfig();
+        protected abstract string[] ValidateConfig();
         protected abstract void Execute();
         protected override void ExecuteDataversePlugin(ILocalPluginContext localPluginContext)
         {
@@ -29,9 +30,11 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
 
             try
             {
-                if(!ValidateConfig())
+                var erroredConfigRules = ValidateConfig();
+                if (erroredConfigRules.Any())
                 {
-                    throw new InvalidPluginExecutionException("Plugin is not configured correctly");
+                    var formattedErroredConfigRules = string.Join(",", erroredConfigRules);
+                    throw new InvalidPluginExecutionException($"Plugin is not configured correctly. Errored config rules: {formattedErroredConfigRules}");
                 }
 
                 Execute();                

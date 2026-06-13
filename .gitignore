@@ -419,3 +419,6 @@ FodyWeavers.xsd
 
 # seperated app settings
 appsettings.config
+
+# Ignore claude files
+/.claude/*.*

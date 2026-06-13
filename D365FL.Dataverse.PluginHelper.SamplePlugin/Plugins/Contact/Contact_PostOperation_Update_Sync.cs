@@ -11,7 +11,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
         {
 
         }
-        protected override bool ValidateConfig()
+        protected override string[] ValidateConfig()
         {
             var rules = new RuleFactory(base.Context, base.Tracer);
             rules.AddIsPostOperationRule()
@@ -22,7 +22,8 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
                 .AddDoesNotExceedMaxDepthRule(3)
                 .AddHasPreImageRule()
                 .TraceRules();
-            return rules.IsValid;
+
+            return rules.Errors;
         }
 
         protected override void Execute()

@@ -21,6 +21,14 @@
     <Company>D365 Freelancing</Company>
     <Description>This is a sample nuget package which contains a Dataverse plugin and its runtime dependencies like Newtonsoft.Json</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Account\**" />
+    <Compile Remove="Logic\Contacts\**" />
+    <EmbeddedResource Remove="Account\**" />
+    <EmbeddedResource Remove="Logic\Contacts\**" />
+    <None Remove="Account\**" />
+    <None Remove="Logic\Contacts\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.*" PrivateAssets="All" />
@@ -30,11 +38,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\D365FL.Dataverse.PluginHelper.Core\D365FL.Dataverse.PluginHelper.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Account\" />
-    <Folder Include="Logic\Contacts\Queries\" />
   </ItemGroup>
 
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Plugin.targets" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Plugin.targets')" />

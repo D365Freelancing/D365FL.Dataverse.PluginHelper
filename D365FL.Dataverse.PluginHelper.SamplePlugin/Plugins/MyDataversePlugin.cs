@@ -1,8 +1,6 @@
 ﻿using D365FL.Dataverse.PluginHelper.Core.EntityExtensions;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
-using Microsoft.Xrm.Sdk;
-using System.Runtime.InteropServices;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
 {
@@ -12,7 +10,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
         {
         }
 
-        protected override bool ValidateConfig()
+        protected override string[] ValidateConfig()
         {
             var rules = new RuleFactory(Context, Tracer);
             rules.AddIsPreOperationRule()
@@ -23,7 +21,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins
                 .AddDoesNotExceedMaxDepthRule(3)
                 .AddHasPreImageRule();
 
-            return rules.IsValid;
+            return rules.Errors;
         }
 
         protected override void Execute()

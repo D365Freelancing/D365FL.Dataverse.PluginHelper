@@ -174,6 +174,8 @@ namespace D365FL.Dataverse.PluginHelper.Core.Rules
 
         public bool IsValid => _rules.All(r => r.Value);
 
+        public string[] Errors => _rules.Where(r => !r.Value).Select(r => r.Key).ToArray();
+
         public void TraceRules(string tracingLabel = "RuleValidation")
         {
             var invalidRules = GetRuleDictionary().Where(r => !r.Value).ToList();

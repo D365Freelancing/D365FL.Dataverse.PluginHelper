@@ -11,7 +11,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
         {
 
         }
-        protected override bool ValidateConfig()
+        protected override string[] ValidateConfig()
         {
             var rules = new RuleFactory(base.Context, base.Tracer);
             rules.AddIsPreOperationRule()
@@ -22,7 +22,7 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account
                 .AddDoesNotExceedMaxDepthRule(3)
                 .TraceRules();
 
-            return rules.IsValid;
+            return rules.Errors;
         }
 
         protected override void Execute()

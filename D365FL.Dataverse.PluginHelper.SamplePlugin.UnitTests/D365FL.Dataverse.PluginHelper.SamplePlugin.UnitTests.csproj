@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <ProjectGuid>{96593B0C-615B-45F9-918D-6B72C663F668}</ProjectGuid>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests</RootNamespace>
+    <AssemblyName>D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FakeXrmEasy.v9" Version="2.6.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.*" PrivateAssets="All" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D365FL.Dataverse.PluginHelper.Core\D365FL.Dataverse.PluginHelper.Core.csproj" />
+    <ProjectReference Include="..\D365FL.Dataverse.PluginHelper.SamplePlugin\D365FL.Dataverse.PluginHelper.SamplePlugin.csproj" />
+  </ItemGroup>
+
+</Project>
