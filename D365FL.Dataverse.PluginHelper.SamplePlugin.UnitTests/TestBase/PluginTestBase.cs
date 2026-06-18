@@ -33,7 +33,11 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.TestBase
             public const string IsCreateMessage = "IsCreateMessage";
             public const string HasPreImage = "HasPreImage";
             public const string IsPreOperation = "IsPreOperation";
+            public const string IsPostOperation = "IsPostOperation";
             public const string IsSynchronous = "IsSynchronous";
+            public const string IsDeleteMessage = "IsDeleteMessage";
+            public const string HasTargetEntityLogicalName_contact = "HasTargetEntityLogicalName_contact";
+            public const string HasTargetEntityReferenceLogicalName_contact = "HasTargetEntityReferenceLogicalName_contact";
         }
         
         // Boundary value constants

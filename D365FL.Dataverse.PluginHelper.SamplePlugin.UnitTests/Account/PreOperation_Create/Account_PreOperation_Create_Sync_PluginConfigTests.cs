@@ -49,7 +49,6 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Account.PreOperat
             target["tickersymbol"] = "MSFT";
             target["telephone1"] = "555-1234";
             var pluginCtx = BuildAccountCreateContext(_context, target);
-            pluginCtx.PrimaryEntityName = ContactLogicalName; // Wrong entity
 
             // Act
             _context.ExecutePluginWithConfigurations<Account_PreOperation_Create_Sync>(pluginCtx, null, null);

@@ -55,5 +55,10 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact
             pluginCtx.PostEntityImages = new EntityImageCollection();
             return pluginCtx;
         }
+
+        public static class ExceptionMessages
+        {
+            public const string ParentCustomerIdCannotBeEmpty = "parentCustomerId cannot be empty.\r\nParameter name: parentCustomerId";
+        }
     }
 }
