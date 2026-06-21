@@ -2,7 +2,6 @@
 using System.Linq;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Account;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 {

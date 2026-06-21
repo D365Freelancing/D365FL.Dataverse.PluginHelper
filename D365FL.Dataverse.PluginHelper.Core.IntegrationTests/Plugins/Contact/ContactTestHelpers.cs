@@ -15,12 +15,15 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
             account["tickersymbol"] = tickerSymbol;
             return account;
         }
-        public static Entity CreateContact(string firstName, string lastName, Guid parentCustomerId)
+        public static Entity CreateContact(string firstName, string lastName, Guid? parentCustomerId = null)
         {
             var contact = new Entity(contactEntityLogicalName);
             contact["firstname"] = firstName;
             contact["lastname"] = lastName;
-            contact["parentcustomerid"] = new EntityReference(accountEntityLogicalName, parentCustomerId);
+            
+            if(parentCustomerId != null)
+                contact["parentcustomerid"] = new EntityReference(accountEntityLogicalName, parentCustomerId.Value);
+
             return contact;
         }
         public static void UpdateParentcustomerid(Entity contact, Guid parentCustomerId)

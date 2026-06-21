@@ -36,5 +36,27 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
             Assert.AreEqual(0, contactCountForAccount1);
             Assert.AreEqual(2, contactCountForAccount2);
         }
+
+        [TestMethod]
+        public void Contact_PostOperation_Update_Sync_GetsCorrectContactCount_WhenCompanyIsSetForTheFirstTime()
+        {
+            // ARRANGE — contact created with no Company/parentcustomerid
+            var account = ContactTestHelpers.CreateAccount("1", "ACC");
+            var accountId = AssemblyLifecycle.CreateAndTrackEntity(account);
+
+            var contact = ContactTestHelpers.CreateContact("John", "Smith");
+            contact.Id = AssemblyLifecycle.CreateAndTrackEntity(contact);
+
+            // ACT — set Company for the first time
+            ContactTestHelpers.UpdateParentcustomerid(contact, accountId);
+            AssemblyLifecycle.UpdateEntity(contact);
+
+            // ASSERT
+            var savedAccount = AssemblyLifecycle.OrgService.Retrieve(
+                ContactTestHelpers.accountEntityLogicalName, accountId, new ColumnSet("d365fl_contactcount"));
+            var contactCount = savedAccount.GetAttributeValue<int>("d365fl_contactcount");
+
+            Assert.AreEqual(1, contactCount);
+        }
     }
 }

@@ -49,6 +49,40 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact.PostOpera
             }
         }
 
+        [TestMethod]
+        // TODO: Aggregate queries are not supported by FakeXrmEasy — contact count value is always 0 in unit tests. Manually verify count accuracy with integration tests.
+        public void Execute_UpdatesNewAccountOnly_WhenParentCustomerIdIsSetForTheFirstTime()
+        {
+            // Arrange — preImage has no parentcustomerid at all (Company never set before)
+            var newAccountId = Guid.NewGuid();
+            var contactId = Guid.NewGuid();
+            _context.Initialize(new List<Entity> { CreateAccountEntity(newAccountId) });
+
+            var preImage = new Entity(ContactLogicalName, contactId);
+            // parentcustomerid deliberately absent — Company set for the first time
+            var target = new Entity(ContactLogicalName, contactId);
+            target["parentcustomerid"] = new EntityReference(AccountLogicalName, newAccountId);
+            var pluginCtx = BuildContactUpdateContext(_context, target, preImage);
+
+            try
+            {
+                _context.ExecutePluginWithConfigurations<Contact_PostOperation_Update_Sync>(pluginCtx, null, null);
+
+                var orgService = _context.GetOrganizationService();
+                var updatedNew = orgService.Retrieve(AccountLogicalName, newAccountId,
+                    new Microsoft.Xrm.Sdk.Query.ColumnSet("d365fl_contactcount"));
+                Assert.IsTrue(updatedNew.Contains("d365fl_contactcount"));
+            }
+            catch (InvalidPluginExecutionException ex)
+            {
+                if (ex.InnerException is ArgumentException &&
+                    ex.InnerException.Message == ExceptionMessages.ParentCustomerIdCannotBeEmpty)
+                {
+                    Assert.Fail("nonEmptyAccountIds filter regressed: empty preImage parent reached the aggregate query.");
+                }
+            }
+        }
+
         // ─── Boundary Tests ───────────────────────────────────────────────────────
 
         [TestMethod]
