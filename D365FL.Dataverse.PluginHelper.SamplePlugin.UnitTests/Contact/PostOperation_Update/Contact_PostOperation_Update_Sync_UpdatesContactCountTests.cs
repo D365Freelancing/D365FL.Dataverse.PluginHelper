@@ -78,7 +78,43 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact.PostOpera
                 if (ex.InnerException is ArgumentException &&
                     ex.InnerException.Message == ExceptionMessages.ParentCustomerIdCannotBeEmpty)
                 {
-                    Assert.Fail("nonEmptyAccountIds filter regressed: empty preImage parent reached the aggregate query.");
+                    Assert.Fail("Empty-id filter in UpdateChildContactCountOnAccount regressed: empty preImage parent reached the aggregate query.");
+                }
+            }
+        }
+
+        [TestMethod]
+        // TODO: Aggregate queries are not supported by FakeXrmEasy — contact count value is always 0 in unit tests. Manually verify count accuracy with integration tests.
+        public void Execute_UpdatesOldAccountOnly_WhenParentCustomerChangesFromAccountToContact()
+        {
+            // Arrange — contact moves from an account to a contact-typed parent (a valid "Customer" value)
+            var oldAccountId = Guid.NewGuid();
+            var newContactParentId = Guid.NewGuid();
+            var contactId = Guid.NewGuid();
+            _context.Initialize(new List<Entity> { CreateAccountEntity(oldAccountId) });
+
+            var preImage = CreateContactWithParent(oldAccountId, contactId);
+            var target = new Entity(ContactLogicalName, contactId);
+            target["parentcustomerid"] = new EntityReference(ContactLogicalName, newContactParentId); // now a contact
+            var pluginCtx = BuildContactUpdateContext(_context, target, preImage);
+
+            // Act — the old account must still be recalculated (the contact left it). The new
+            // contact-typed parent yields Guid.Empty and must be filtered out, not throw.
+            try
+            {
+                _context.ExecutePluginWithConfigurations<Contact_PostOperation_Update_Sync>(pluginCtx, null, null);
+
+                var orgService = _context.GetOrganizationService();
+                var updatedOld = orgService.Retrieve(AccountLogicalName, oldAccountId,
+                    new Microsoft.Xrm.Sdk.Query.ColumnSet("d365fl_contactcount"));
+                Assert.IsTrue(updatedOld.Contains("d365fl_contactcount"));
+            }
+            catch (InvalidPluginExecutionException ex)
+            {
+                if (ex.InnerException is ArgumentException &&
+                    ex.InnerException.Message == ExceptionMessages.ParentCustomerIdCannotBeEmpty)
+                {
+                    Assert.Fail("Empty contact-typed parent reached the aggregate query — it should have been filtered.");
                 }
             }
         }

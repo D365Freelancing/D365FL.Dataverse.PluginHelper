@@ -4,7 +4,6 @@ using FakeXrmEasy.Plugins;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xrm.Sdk;
 using D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.TestBase;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact.PostOperation_Delete
 {
@@ -60,17 +59,9 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact.PostOpera
         }
 
         [TestMethod]
-        [ExpectedInnerExceptionWithMessage(
-            typeof(InvalidPluginExecutionException),
-            typeof(ArgumentException),
-            ExceptionMessages.ParentCustomerIdCannotBeEmpty)]
-        public void Execute_ThrowsInvalidPluginExecutionException_WhenPreImageParentCustomerIsContact_NotAccount()
+        public void Execute_DoesNotThrowOrUpdate_WhenPreImageParentCustomerIsContact_NotAccount()
         {
-            // Arrange — parentcustomerid in preImage points to a Contact, not Account.
-            // GetParentCustomerId returns Guid.Empty, which is passed into the update path.
-            // ContactCounterForAccountQuery.GetContactCountFor(Guid.Empty) throws ArgumentException
-            // before the aggregate query runs — this is a real runtime guard, not a FakeXrmEasy limitation.
-            // D365FLPluginBase wraps it as InvalidPluginExecutionException.
+            // Arrange — parentcustomerid in preImage points to a Contact: a valid "Customer" value.
             var parentContactId = Guid.NewGuid();
             var contactId = Guid.NewGuid();
             var preImage = new Entity(ContactLogicalName, contactId);
@@ -78,29 +69,31 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact.PostOpera
             var targetRef = new EntityReference(ContactLogicalName, contactId);
             var pluginCtx = BuildContactDeleteContext(_context, targetRef, preImage);
 
-            // Act
+            // Act — must NOT throw. GetParentCustomerId returns Guid.Empty, which
+            // UpdateChildContactCountOnAccount now filters out, so no account update is attempted.
             _context.ExecutePluginWithConfigurations<Contact_PostOperation_Delete_Sync>(pluginCtx, null, null);
+
+            // Assert — no exception means deleting such a contact succeeds.
         }
 
         // ─── Boundary Tests ───────────────────────────────────────────────────────
 
         [TestMethod]
-        [ExpectedInnerExceptionWithMessage(
-            typeof(InvalidPluginExecutionException),
-            typeof(ArgumentException),
-            ExceptionMessages.ParentCustomerIdCannotBeEmpty)]
-        public void Execute_ThrowsInvalidPluginExecutionException_WhenPreImageParentCustomerIdIsNull()
+        public void Execute_DoesNotThrowOrUpdate_WhenPreImageParentCustomerIdIsNull()
         {
-            // Arrange — parentcustomerid is explicitly set to null in preImage
+            // Arrange — parentcustomerid is present but explicitly null in preImage
             var contactId = Guid.NewGuid();
             var preImage = new Entity(ContactLogicalName, contactId);
             preImage["parentcustomerid"] = null; // Explicitly null
             var targetRef = new EntityReference(ContactLogicalName, contactId);
             var pluginCtx = BuildContactDeleteContext(_context, targetRef, preImage);
 
-            // Act — field is present but null; AreContactCountFieldsDirty checks Contains() → true
-            // GetParentCustomerId returns Guid.Empty for null EntityReference → ArgumentException → InvalidPluginExecutionException
+            // Act — field is present but null; AreContactCountFieldsDirty checks Contains() → true.
+            // GetParentCustomerId returns Guid.Empty, which UpdateChildContactCountOnAccount filters
+            // out, so no account update is attempted and no exception is thrown.
             _context.ExecutePluginWithConfigurations<Contact_PostOperation_Delete_Sync>(pluginCtx, null, null);
+
+            // Assert — no exception means the plugin exited cleanly with no update attempted.
         }
     }
 }

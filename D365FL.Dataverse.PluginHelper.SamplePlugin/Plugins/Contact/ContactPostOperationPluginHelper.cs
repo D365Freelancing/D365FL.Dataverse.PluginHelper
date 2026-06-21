@@ -61,7 +61,11 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
         {
             var counter = new SetChildContactCountCommand(_orgService, _tracer);
 
-            foreach (var accountId in accountsToUpdate)
+            // Skip non-account customers (e.g. a contact-typed parentcustomerid) and nulls,
+            // which arrive here as Guid.Empty. Updating an account count for them is invalid.
+            var validAccountIds = accountsToUpdate.Where(id => id != Guid.Empty).Distinct();
+
+            foreach (var accountId in validAccountIds)
                 counter.Execute(accountId);
         }
     }

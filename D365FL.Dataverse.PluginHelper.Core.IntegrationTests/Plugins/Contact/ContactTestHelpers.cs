@@ -26,9 +26,14 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
 
             return contact;
         }
-        public static void UpdateParentcustomerid(Entity contact, Guid parentCustomerId)
+        public static void UpdateParentCustomerIdToAccount(Entity contact, Guid parentCustomerId)
         {
             contact["parentcustomerid"] = new EntityReference(accountEntityLogicalName, parentCustomerId);
+        }
+
+        public static void UpdateParentCustomerIdToContact(Entity contact, Guid parentCustomerId)
+        {
+            contact["parentcustomerid"] = new EntityReference(contactEntityLogicalName, parentCustomerId);
         }
         public static List<Entity> CreateBulkContacts(Guid accountId, int totalContacts)
         {

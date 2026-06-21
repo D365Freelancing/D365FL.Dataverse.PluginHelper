@@ -23,7 +23,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
 
             // ACT
             // update contact1 to account2
-            ContactTestHelpers.UpdateParentcustomerid(contact1, account2Id); 
+            ContactTestHelpers.UpdateParentCustomerIdToAccount(contact1, account2Id); 
             AssemblyLifecycle.UpdateEntity(contact1);
 
             // ASSERT
@@ -48,7 +48,7 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
             contact.Id = AssemblyLifecycle.CreateAndTrackEntity(contact);
 
             // ACT — set Company for the first time
-            ContactTestHelpers.UpdateParentcustomerid(contact, accountId);
+            ContactTestHelpers.UpdateParentCustomerIdToAccount(contact, accountId);
             AssemblyLifecycle.UpdateEntity(contact);
 
             // ASSERT
@@ -57,6 +57,31 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
             var contactCount = savedAccount.GetAttributeValue<int>("d365fl_contactcount");
 
             Assert.AreEqual(1, contactCount);
+        }
+
+        [TestMethod]
+        public void Contact_PostOperation_Update_Sync_DoesNotThrow_WhenCompanyChangesFromAccountToContact()
+        {
+            // ARRANGE — contact starts with an account parent, then is reassigned to a contact parent
+            var account = ContactTestHelpers.CreateAccount("1", "ACC");
+            var accountId = AssemblyLifecycle.CreateAndTrackEntity(account);
+
+            var parentContact = ContactTestHelpers.CreateContact("Parent", "Contact");
+            parentContact.Id = AssemblyLifecycle.CreateAndTrackEntity(parentContact);
+
+            var contact = ContactTestHelpers.CreateContact("John", "Smith", accountId);
+            contact.Id = AssemblyLifecycle.CreateAndTrackEntity(contact);
+
+            // ACT — reassign to a contact-typed parent (valid Customer lookup value)
+            ContactTestHelpers.UpdateParentCustomerIdToContact(contact, parentContact.Id);
+            
+            AssemblyLifecycle.UpdateEntity(contact);
+
+            // ASSERT — old account's count should drop to 0, no exception thrown
+            var savedAccount = AssemblyLifecycle.OrgService.Retrieve(
+                ContactTestHelpers.accountEntityLogicalName, accountId, new ColumnSet("d365fl_contactcount"));
+            var contactCount = savedAccount.GetAttributeValue<int>("d365fl_contactcount");
+            Assert.AreEqual(0, contactCount);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
@@ -68,6 +69,24 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
             var savedAccount = AssemblyLifecycle.OrgService.Retrieve(accountEntityLogicalName, accountId, new ColumnSet("d365fl_contactcount"));
             var contactCount = savedAccount.GetAttributeValue<int>("d365fl_contactcount");
             Assert.AreEqual(totalContacts, contactCount);
+        }
+
+        [TestMethod]
+        public void Contact_PostOperation_Create_Sync_DoesNotThrow_WhenParentCustomerIsContact()
+        {
+            // ARRANGE — create a "parent" contact, then create a child contact whose Company is that contact
+            var parentContact = ContactTestHelpers.CreateContact("Parent", "Contact");
+            parentContact.Id = AssemblyLifecycle.CreateAndTrackEntity(parentContact);
+
+            var childContact = new Entity(ContactTestHelpers.contactEntityLogicalName);
+            childContact["firstname"] = "Child";
+            childContact["lastname"] = "Contact";
+            childContact["parentcustomerid"] = new EntityReference(ContactTestHelpers.contactEntityLogicalName, parentContact.Id);
+
+            // ACT — must NOT throw; parentcustomerid referencing a contact is valid in the UI
+            AssemblyLifecycle.CreateAndTrackEntity(childContact);
+
+            // ASSERT — no exception means the create succeeded
         }
     }
 }

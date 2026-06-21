@@ -57,5 +57,23 @@ namespace D365FL.Dataverse.PluginHelper.Core.IntegrationTests.Plugins.Contact
 
             Assert.AreEqual(0, contactCountForAccount);
         }
+
+        [TestMethod]
+        public void Contact_PostOperation_Delete_Sync_DoesNotThrow_WhenDeletedContactHadContactParent()
+        {
+            // ARRANGE — create a contact whose parentcustomerid is another contact (valid Customer value)
+            var parentContact = ContactTestHelpers.CreateContact("Parent", "Contact");
+            parentContact.Id = AssemblyLifecycle.CreateAndTrackEntity(parentContact);
+
+            var childContact = ContactTestHelpers.CreateContact("Child", "Contact");
+            ContactTestHelpers.UpdateParentCustomerIdToContact(childContact, parentContact.Id);
+            
+            childContact.Id = AssemblyLifecycle.CreateAndTrackEntity(childContact);
+
+            // ACT — delete the child contact; must NOT throw
+            AssemblyLifecycle.DeleteEntity(childContact);
+
+            // ASSERT — no exception means the delete succeeded
+        }
     }
 }

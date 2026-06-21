@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using D365FL.Dataverse.PluginHelper.Core.PluginExecutionContextExtensions;
 using D365FL.Dataverse.PluginHelper.Core.Rules;
 
@@ -36,18 +35,14 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact
 
             if (helper.AreContactCountFieldsDirty(target, preImage))
             {
-                var accountIds = new Guid[2]; // array to hold the old and new account ids
+                var accountIds = new[]
+                {
+                    helper.GetParentCustomerId(target),   // new account id (Guid.Empty if non-account)
+                    helper.GetParentCustomerId(preImage)  // old account id (Guid.Empty if non-account)
+                };
 
-                var newParentCustomerId = helper.GetParentCustomerId(target); // new account id
-                accountIds[0] = newParentCustomerId;
-
-                var oldParentCustomerId = helper.GetParentCustomerId(preImage); // old account id
-                accountIds[1] = oldParentCustomerId;
-
-                var nonEmptyAccountIds = 
-                    accountIds.Where(id => id != Guid.Empty).Distinct().ToArray(); // remove empty ids
-
-                helper.UpdateChildContactCountOnAccount(nonEmptyAccountIds); // update child contact count on the old and new account
+                // Empty/non-account ids are filtered inside the helper.
+                helper.UpdateChildContactCountOnAccount(accountIds);
             }
         }
     }

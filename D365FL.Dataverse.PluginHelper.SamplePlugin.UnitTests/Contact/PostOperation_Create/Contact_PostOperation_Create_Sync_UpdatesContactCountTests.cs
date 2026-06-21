@@ -4,7 +4,6 @@ using FakeXrmEasy.Plugins;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xrm.Sdk;
 using D365FL.Dataverse.PluginHelper.SamplePlugin.Plugins.Contact;
-using D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.TestBase;
 
 namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact.PostOperation_Create
 {
@@ -62,50 +61,38 @@ namespace D365FL.Dataverse.PluginHelper.SamplePlugin.UnitTests.Contact.PostOpera
 
         // ─── Negative Tests ───────────────────────────────────────────────────────
 
-        // TODO this test passes but the functionality is incorrect.
-        // The plugin should exit early instead of throwing an exception
         [TestMethod]
-        [ExpectedInnerExceptionWithMessage(
-            typeof(InvalidPluginExecutionException),
-            typeof(ArgumentException),
-            ExceptionMessages.ParentCustomerIdCannotBeEmpty)]
-        public void Execute_ThrowsInvalidPluginExecutionException_WhenParentCustomerIsContact_NotAccount()
+        public void Execute_DoesNotThrowOrUpdate_WhenParentCustomerIsContact_NotAccount()
         {
-            // Arrange — parentcustomerid references a Contact (not Account).
-            // GetParentCustomerId returns Guid.Empty, which is passed into the update path.
-            // ContactCounterForAccountQuery.GetContactCountFor(Guid.Empty) throws ArgumentException
-            // before the aggregate query runs — this is a real runtime guard, not a FakeXrmEasy limitation.
-            // D365FLPluginBase wraps it as InvalidPluginExecutionException.
+            // Arrange — parentcustomerid references a Contact: a valid "Customer" lookup value.
             var parentContactId = Guid.NewGuid();
             var contact = new Entity(ContactLogicalName, Guid.NewGuid());
             contact["parentcustomerid"] = new EntityReference(ContactLogicalName, parentContactId);
             var pluginCtx = BuildContactCreateContext(_context, contact);
 
-            // Act
+            // Act — must NOT throw. Previously this threw "parentCustomerId cannot be empty",
+            // blocking users from saving a contact whose Company is another contact.
             _context.ExecutePluginWithConfigurations<Contact_PostOperation_Create_Sync>(pluginCtx, null, null);
+
+            // Assert — no exception means the record saves. GetParentCustomerId returns Guid.Empty,
+            // which UpdateChildContactCountOnAccount now filters out, so no account update is attempted.
         }
 
         // ─── Boundary Tests ───────────────────────────────────────────────────────
 
         [TestMethod]
-        [ExpectedInnerExceptionWithMessage(
-            typeof(InvalidPluginExecutionException),
-            typeof(ArgumentException),
-            ExceptionMessages.ParentCustomerIdCannotBeEmpty)]
-        public void Execute_ThrowsInvalidPluginExecutionException_WhenParentCustomerIdIsEmptyGuid()
+        public void Execute_DoesNotThrowOrUpdate_WhenParentCustomerIdIsEmptyGuid()
         {
-            // Arrange — parentcustomerid EntityReference with Guid.Empty
+            // Arrange — parentcustomerid is an account-typed EntityReference, but its Id is Guid.Empty.
             var contact = new Entity(ContactLogicalName, Guid.NewGuid());
             contact["parentcustomerid"] = new EntityReference(AccountLogicalName, Guid.Empty);
             var pluginCtx = BuildContactCreateContext(_context, contact);
 
-            // Act — the parentcustomerid is an account-typed EntityReference, but its Id is Guid.Empty.
-            // GetParentCustomerId returns that Guid.Empty (it passes the account logical-name check).
-            // ContactCounterForAccountQuery.GetContactCountFor(Guid.Empty) throws ArgumentException
-            // before the aggregate query runs — a real runtime guard, not a FakeXrmEasy limitation.
-            // D365FLPluginBase wraps it as InvalidPluginExecutionException.
-
+            // Act — GetParentCustomerId returns Guid.Empty; UpdateChildContactCountOnAccount filters
+            // it out, so no account update is attempted and no exception is thrown.
             _context.ExecutePluginWithConfigurations<Contact_PostOperation_Create_Sync>(pluginCtx, null, null);
+
+            // Assert — no exception means the plugin exited cleanly with no update attempted.
         }
     }
 }
